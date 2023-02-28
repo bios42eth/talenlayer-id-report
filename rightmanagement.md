@@ -40,9 +40,6 @@ updateArbitrationFeeTimeout
 updateServicePostingFee
 updateProposalPostingFee
  : only the owner of the platform
-Suggestion : the same code is copied multiple time.
-Create a modifier to improve readability and maintenability.
-
 
 whitelistUser, updateMintStatus : only owner role
 updateMintFee, withdraw, addArbitrator

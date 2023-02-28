@@ -13,8 +13,6 @@ What if I want to hide a review ?
 Impossible to burn an id ??
 Right to forgiveness ?
 
-
-
 Review process : very basic. Cannot ask for review before approval.
 Cannot choose to approve it or not.
 

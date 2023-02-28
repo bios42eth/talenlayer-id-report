@@ -42,6 +42,8 @@ Automatic deprecation
 ## Code base analysis
 ### Tests 
 Working fine
+Todo : assess them
+
 ### Coverage:  high : cannot be run.
 "CompilerError: Stack too deep."
 
@@ -49,7 +51,7 @@ Working fine
 Runtime report > slither-report.txt
 
 
-
+## Gas optimization
 
 
 
