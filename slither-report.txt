@@ -1,0 +1,1171 @@
+> slither .
+'npx hardhat compile --force' running
+Generating typings for: 52 artifacts in dir: typechain-types for target: ethers-v5
+Successfully generated 146 typings!
+Compiled 52 Solidity files successfully
+ ·-------------------------|--------------|----------------·
+ |  Contract Name          ·  Size (KiB)  ·  Change (KiB)  │
+ ··························|··············|·················
+ |  TalentLayerArbitrator  ·       2.993  ·                │
+ ··························|··············|·················
+ |  TalentLayerEscrow      ·      19.723  ·                │
+ ··························|··············|·················
+ |  TalentLayerID          ·      16.268  ·                │
+ ··························|··············|·················
+ |  TalentLayerIDV2        ·      15.514  ·                │
+ ··························|··············|·················
+ |  TalentLayerPlatformID  ·      18.883  ·                │
+ ··························|··············|·················
+ |  TalentLayerReview      ·      12.126  ·                │
+ ··························|··············|·················
+ |  TalentLayerService     ·      13.604  ·                │
+ ·-------------------------|--------------|----------------·
+
+(node:88567) ExperimentalWarning: stream/web is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Warning: Return value of low-level calls not used.
+   --> contracts/TalentLayerEscrow.sol:613:17:
+    |
+613 |                 payable(transaction.sender).call{value: senderFee}("");
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Warning: Return value of low-level calls not used.
+   --> contracts/TalentLayerEscrow.sol:620:17:
+    |
+620 |                 payable(transaction.receiver).call{value: receiverFee}("");
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Warning: Return value of low-level calls not used.
+   --> contracts/TalentLayerEscrow.sol:746:13:
+    |
+746 |             payable(transaction.sender).call{value: extraFeeSender}(""); // bios42 unchecked payment
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Warning: Return value of low-level calls not used.
+   --> contracts/TalentLayerEscrow.sol:754:13:
+    |
+754 |             payable(transaction.receiver).call{value: extraFeeReceiver}(""); // bios42 unchecked payment
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Warning: Return value of low-level calls not used.
+   --> contracts/TalentLayerEscrow.sol:784:13:
+    |
+784 |             sender.call{value: senderFee}(""); // bios42 - funds can get lost. Fallback to wrapped
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Warning: Return value of low-level calls not used.
+   --> contracts/TalentLayerEscrow.sol:787:13:
+    |
+787 |             receiver.call{value: receiverFee}("");
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Warning: Return value of low-level calls not used.
+   --> contracts/TalentLayerEscrow.sol:797:13:
+    |
+797 |             sender.call{value: splitFeeAmount}("");
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Warning: Return value of low-level calls not used.
+   --> contracts/TalentLayerEscrow.sol:798:13:
+    |
+798 |             receiver.call{value: splitFeeAmount}(""); // bios42 - some wei can get lost in case of rounding
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Warning: Return value of low-level calls not used.
+   --> contracts/TalentLayerEscrow.sol:969:13:
+    |
+969 |             _recipient.call{value: _amount}(""); // bios42 - what if transfer fails ?
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+TalentLayerEscrow.createTransaction(uint256,uint256,string,string) (contracts/TalentLayerEscrow.sol#409-486) uses arbitrary from in transferFrom: require(bool,string)(IERC20(proposal.rateToken).transferFrom(sender,address(this),transactionAmount),Transfer must not fail) (contracts/TalentLayerEscrow.sol#477-480)
+Reference: https://github.com/trailofbits/slither/wiki/Detector-Documentation#arbitrary-send-erc20
+
+TalentLayerArbitrator._giveRuling(uint256,uint256) (contracts/TalentLayerArbitrator.sol#119-129) sends eth to arbitrary user
+  Dangerous calls:
+  - address(msg.sender).transfer(dispute.fee) (contracts/TalentLayerArbitrator.sol#127)
+TalentLayerEscrow._safeTransferBalance(address,address,uint256) (contracts/TalentLayerEscrow.sol#967-973) sends eth to arbitrary user
+  Dangerous calls:
+  - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+TalentLayerPlatformID.withdraw() (contracts/TalentLayerPlatformID.sol#383-386) sends eth to arbitrary user
+  Dangerous calls:
+  - (sent) = address(msg.sender).call{value: address(this).balance}() (contracts/TalentLayerPlatformID.sol#384)
+MockForwarder.execute(MockForwarder.ForwardRequest) (contracts/mocks/MockForwarder.sol#25-36) sends eth to arbitrary user
+  Dangerous calls:
+  - (success,ret) = req.to.call{gas: req.gas,value: req.value}(callData) (contracts/mocks/MockForwarder.sol#27)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+
+ERC1967UpgradeUpgradeable._functionDelegateCall(address,bytes) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#198-204) uses delegatecall to a input-controlled function id
+  - (success,returndata) = target.delegatecall(data) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#202)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#controlled-delegatecall
+
+Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
+  External calls:
+  - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
+  State variables written after the call(s):
+  - transaction.senderFee = _arbitrationCost (contracts/TalentLayerEscrow.sol#745)
+Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
+  External calls:
+  - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
+  - address(transaction.sender).call{value: extraFeeSender}() (contracts/TalentLayerEscrow.sol#746)
+  State variables written after the call(s):
+  - transaction.receiverFee = _arbitrationCost (contracts/TalentLayerEscrow.sol#753)
+Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624):
+  External calls:
+  - address(transaction.sender).call{value: senderFee}() (contracts/TalentLayerEscrow.sol#613)
+  - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+    - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+    - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+    - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+    - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+  External calls sending eth:
+  - address(transaction.sender).call{value: senderFee}() (contracts/TalentLayerEscrow.sol#613)
+  - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+    - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+    - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+    - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+  State variables written after the call(s):
+  - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+    - transaction.amount = 0 (contracts/TalentLayerEscrow.sol#777)
+    - transaction.senderFee = 0 (contracts/TalentLayerEscrow.sol#778)
+    - transaction.receiverFee = 0 (contracts/TalentLayerEscrow.sol#779)
+    - transaction.status = Status.Resolved (contracts/TalentLayerEscrow.sol#780)
+Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624):
+  External calls:
+  - address(transaction.receiver).call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#620)
+  - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+    - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+    - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+    - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+    - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+  External calls sending eth:
+  - address(transaction.receiver).call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#620)
+  - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+    - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+    - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+    - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+  State variables written after the call(s):
+  - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+    - transaction.amount = 0 (contracts/TalentLayerEscrow.sol#777)
+    - transaction.senderFee = 0 (contracts/TalentLayerEscrow.sol#778)
+    - transaction.receiverFee = 0 (contracts/TalentLayerEscrow.sol#779)
+    - transaction.status = Status.Resolved (contracts/TalentLayerEscrow.sol#780)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities
+
+TalentLayerEscrow._safeTransferBalance(address,address,uint256) (contracts/TalentLayerEscrow.sol#967-973) ignores return value by IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-transfer
+
+TalentLayerIDV2.talentLayerPlatformIdContract (contracts/tests/TalentLayerIDV2.sol#54) is never initialized. It is used in:
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-state-variables
+
+Base64Upgradeable.encode(bytes) (node_modules/@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol#20-91) performs a multiplication on the result of a division:
+  - result = new string(4 * ((data.length + 2) / 3)) (node_modules/@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol#36)
+MathUpgradeable.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#102)
+  - inverse = (3 * denominator) ^ 2 (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#117)
+MathUpgradeable.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#121)
+MathUpgradeable.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#122)
+MathUpgradeable.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#123)
+MathUpgradeable.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#124)
+MathUpgradeable.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#125)
+MathUpgradeable.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#126)
+MathUpgradeable.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#55-135) performs a multiplication on the result of a division:
+  - prod0 = prod0 / twos (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#105)
+  - result = prod0 * inverse (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#132)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#102)
+  - inverse = (3 * denominator) ^ 2 (node_modules/@openzeppelin/contracts/utils/math/Math.sol#117)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#121)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#122)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#123)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#124)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#125)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#55-135) performs a multiplication on the result of a division:
+  - denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#102)
+  - inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#126)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#55-135) performs a multiplication on the result of a division:
+  - prod0 = prod0 / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#105)
+  - result = prod0 * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#132)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#divide-before-multiply
+
+TalentLayerEscrow.getTransactionDetails(uint256) (contracts/TalentLayerEscrow.sol#367-377) uses a dangerous strict equality:
+  - require(bool,string)(sender == transaction.sender || sender == transaction.receiver,You are not related to this transaction) (contracts/TalentLayerEscrow.sol#372-375)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+
+Reentrancy in TalentLayerID.freeMint(uint256,address,string) (contracts/TalentLayerID.sol#285-292):
+  External calls:
+  - _safeMint(_userAddress,nextProfileId.current()) (contracts/TalentLayerID.sol#290)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(_userAddress,_handle,_platformId,0) (contracts/TalentLayerID.sol#291)
+    - takenHandles[_handle] = true (contracts/TalentLayerID.sol#330)
+Reentrancy in TalentLayerIDV2.freeMint(uint256,address,string) (contracts/tests/TalentLayerIDV2.sol#273-280):
+  External calls:
+  - _safeMint(_userAddress,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#278)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(_userAddress,_handle,_platformId,0) (contracts/tests/TalentLayerIDV2.sol#279)
+    - takenHandles[_handle] = true (contracts/tests/TalentLayerIDV2.sol#318)
+Reentrancy in TalentLayerID.mint(uint256,string) (contracts/TalentLayerID.sol#196-204):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#202)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#203)
+    - takenHandles[_handle] = true (contracts/TalentLayerID.sol#330)
+Reentrancy in TalentLayerPlatformID.mint(string) (contracts/TalentLayerPlatformID.sol#233-238):
+  External calls:
+  - _safeMint(msg.sender,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#236)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(_platformName,msg.sender) (contracts/TalentLayerPlatformID.sol#237)
+    - takenNames[_platformName] = true (contracts/TalentLayerPlatformID.sol#433)
+Reentrancy in TalentLayerIDV2.mint(uint256,string) (contracts/tests/TalentLayerIDV2.sol#184-192):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#190)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#191)
+    - takenHandles[_handle] = true (contracts/tests/TalentLayerIDV2.sol#318)
+Reentrancy in TalentLayerPlatformID.mintForAddress(string,address) (contracts/TalentLayerPlatformID.sol#246-252):
+  External calls:
+  - _safeMint(_platformAddress,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#250)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(_platformName,_platformAddress) (contracts/TalentLayerPlatformID.sol#251)
+    - takenNames[_platformName] = true (contracts/TalentLayerPlatformID.sol#433)
+Reentrancy in TalentLayerID.whitelistMint(uint256,string,bytes32[]) (contracts/TalentLayerID.sol#212-223):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#221)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#222)
+    - takenHandles[_handle] = true (contracts/TalentLayerID.sol#330)
+Reentrancy in TalentLayerIDV2.whitelistMint(uint256,string,bytes32[]) (contracts/tests/TalentLayerIDV2.sol#200-211):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#209)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#210)
+    - takenHandles[_handle] = true (contracts/tests/TalentLayerIDV2.sol#318)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-1
+
+TalentLayerReview.mint(uint256,uint256,string,uint256) (contracts/TalentLayerReview.sol#119-148) contains a tautology or contradiction:
+  - require(bool,string)(_rating <= 5 && _rating >= 0,Invalid rating) (contracts/TalentLayerReview.sol#132)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#tautology-or-contradiction
+
+TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624) ignores return value by address(transaction.sender).call{value: senderFee}() (contracts/TalentLayerEscrow.sol#613)
+TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624) ignores return value by address(transaction.receiver).call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#620)
+TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757) ignores return value by address(transaction.sender).call{value: extraFeeSender}() (contracts/TalentLayerEscrow.sol#746)
+TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757) ignores return value by address(transaction.receiver).call{value: extraFeeReceiver}() (contracts/TalentLayerEscrow.sol#754)
+TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802) ignores return value by sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802) ignores return value by receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802) ignores return value by sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802) ignores return value by receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+TalentLayerEscrow._safeTransferBalance(address,address,uint256) (contracts/TalentLayerEscrow.sol#967-973) ignores return value by _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-low-level-calls
+
+ERC1967UpgradeUpgradeable._upgradeToAndCallUUPS(address,bytes,bool).slot (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#98) is a local variable never initialized
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+
+ERC1967UpgradeUpgradeable._upgradeToAndCallUUPS(address,bytes,bool) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#87-105) ignores return value by IERC1822ProxiableUpgradeable(newImplementation).proxiableUUID() (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#98-102)
+ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#434-456) ignores return value by IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+
+TalentLayerEscrow.initialize(address,address,address,address)._protocolWallet (contracts/TalentLayerEscrow.sol#330) lacks a zero-check on :
+    - protocolWallet = address(_protocolWallet) (contracts/TalentLayerEscrow.sol#338)
+TalentLayerEscrow.updateProtocolWallet(address)._protocolWallet (contracts/TalentLayerEscrow.sol#396) lacks a zero-check on :
+    - protocolWallet = _protocolWallet (contracts/TalentLayerEscrow.sol#397)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+
+Variable 'ERC1967UpgradeUpgradeable._upgradeToAndCallUUPS(address,bytes,bool).slot (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#98)' in ERC1967UpgradeUpgradeable._upgradeToAndCallUUPS(address,bytes,bool) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#87-105) potentially used before declaration: require(bool,string)(slot == _IMPLEMENTATION_SLOT,ERC1967Upgrade: unsupported proxiableUUID) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#99)
+Variable 'ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes).retval (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441)' in ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#434-456) potentially used before declaration: retval == IERC721ReceiverUpgradeable.onERC721Received.selector (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#442)
+Variable 'ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes).reason (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#443)' in ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#434-456) potentially used before declaration: reason.length == 0 (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#444)
+Variable 'ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes).reason (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#443)' in ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#434-456) potentially used before declaration: revert(uint256,uint256)(32 + reason,mload(uint256)(reason)) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#449)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#pre-declaration-usage-of-local-variables
+
+Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
+  External calls:
+  - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
+  State variables written after the call(s):
+  - disputeIDtoTransactionID[transaction.disputeId] = _transactionId (contracts/TalentLayerEscrow.sol#739)
+Reentrancy in TalentLayerID.freeMint(uint256,address,string) (contracts/TalentLayerID.sol#285-292):
+  External calls:
+  - _safeMint(_userAddress,nextProfileId.current()) (contracts/TalentLayerID.sol#290)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(_userAddress,_handle,_platformId,0) (contracts/TalentLayerID.sol#291)
+    - ids[_userAddress] = userProfileId (contracts/TalentLayerID.sol#331)
+  - _afterMint(_userAddress,_handle,_platformId,0) (contracts/TalentLayerID.sol#291)
+    - profile.platformId = _platformId (contracts/TalentLayerID.sol#328)
+    - profile.handle = _handle (contracts/TalentLayerID.sol#329)
+Reentrancy in TalentLayerIDV2.freeMint(uint256,address,string) (contracts/tests/TalentLayerIDV2.sol#273-280):
+  External calls:
+  - _safeMint(_userAddress,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#278)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(_userAddress,_handle,_platformId,0) (contracts/tests/TalentLayerIDV2.sol#279)
+    - ids[_userAddress] = userProfileId (contracts/tests/TalentLayerIDV2.sol#319)
+  - _afterMint(_userAddress,_handle,_platformId,0) (contracts/tests/TalentLayerIDV2.sol#279)
+    - profile.platformId = _platformId (contracts/tests/TalentLayerIDV2.sol#316)
+    - profile.handle = _handle (contracts/tests/TalentLayerIDV2.sol#317)
+Reentrancy in TalentLayerID.mint(uint256,string) (contracts/TalentLayerID.sol#196-204):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#202)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#203)
+    - ids[_userAddress] = userProfileId (contracts/TalentLayerID.sol#331)
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#203)
+    - profile.platformId = _platformId (contracts/TalentLayerID.sol#328)
+    - profile.handle = _handle (contracts/TalentLayerID.sol#329)
+Reentrancy in TalentLayerPlatformID.mint(string) (contracts/TalentLayerPlatformID.sol#233-238):
+  External calls:
+  - _safeMint(msg.sender,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#236)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(_platformName,msg.sender) (contracts/TalentLayerPlatformID.sol#237)
+    - ids[_platformAddress] = platformId (contracts/TalentLayerPlatformID.sol#434)
+  - _afterMint(_platformName,msg.sender) (contracts/TalentLayerPlatformID.sol#237)
+    - platform.name = _platformName (contracts/TalentLayerPlatformID.sol#430)
+    - platform.id = platformId (contracts/TalentLayerPlatformID.sol#431)
+    - platform.arbitrationFeeTimeout = minArbitrationFeeTimeout (contracts/TalentLayerPlatformID.sol#432)
+Reentrancy in TalentLayerReview.mint(uint256,uint256,string,uint256) (contracts/TalentLayerReview.sol#119-148):
+  External calls:
+  - _safeMint(sender,nextReviewId.current()) (contracts/TalentLayerReview.sol#146)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(_serviceId,toId,_rating,_reviewUri) (contracts/TalentLayerReview.sol#147)
+    - reviews[reviewId] = Review(reviewId,_to,_reviewUri,_serviceId,_rating) (contracts/TalentLayerReview.sol#168-174)
+Reentrancy in TalentLayerIDV2.mint(uint256,string) (contracts/tests/TalentLayerIDV2.sol#184-192):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#190)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#191)
+    - ids[_userAddress] = userProfileId (contracts/tests/TalentLayerIDV2.sol#319)
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#191)
+    - profile.platformId = _platformId (contracts/tests/TalentLayerIDV2.sol#316)
+    - profile.handle = _handle (contracts/tests/TalentLayerIDV2.sol#317)
+Reentrancy in TalentLayerPlatformID.mintForAddress(string,address) (contracts/TalentLayerPlatformID.sol#246-252):
+  External calls:
+  - _safeMint(_platformAddress,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#250)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(_platformName,_platformAddress) (contracts/TalentLayerPlatformID.sol#251)
+    - ids[_platformAddress] = platformId (contracts/TalentLayerPlatformID.sol#434)
+  - _afterMint(_platformName,_platformAddress) (contracts/TalentLayerPlatformID.sol#251)
+    - platform.name = _platformName (contracts/TalentLayerPlatformID.sol#430)
+    - platform.id = platformId (contracts/TalentLayerPlatformID.sol#431)
+    - platform.arbitrationFeeTimeout = minArbitrationFeeTimeout (contracts/TalentLayerPlatformID.sol#432)
+Reentrancy in TalentLayerID.whitelistMint(uint256,string,bytes32[]) (contracts/TalentLayerID.sol#212-223):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#221)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#222)
+    - ids[_userAddress] = userProfileId (contracts/TalentLayerID.sol#331)
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#222)
+    - profile.platformId = _platformId (contracts/TalentLayerID.sol#328)
+    - profile.handle = _handle (contracts/TalentLayerID.sol#329)
+Reentrancy in TalentLayerIDV2.whitelistMint(uint256,string,bytes32[]) (contracts/tests/TalentLayerIDV2.sol#200-211):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#209)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  State variables written after the call(s):
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#210)
+    - ids[_userAddress] = userProfileId (contracts/tests/TalentLayerIDV2.sol#319)
+  - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#210)
+    - profile.platformId = _platformId (contracts/tests/TalentLayerIDV2.sol#316)
+    - profile.handle = _handle (contracts/tests/TalentLayerIDV2.sol#317)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+
+Reentrancy in TalentLayerEscrow._afterPayment(uint256,TalentLayerEscrow.PaymentType,uint256) (contracts/TalentLayerEscrow.sol#951-959):
+  External calls:
+  - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  Event emitted after the call(s):
+  - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
+Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802):
+  External calls:
+  - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+  - _reimburse(_transactionId,amount) (contracts/TalentLayerEscrow.sol#785)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  External calls sending eth:
+  - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+  - _reimburse(_transactionId,amount) (contracts/TalentLayerEscrow.sol#785)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  Event emitted after the call(s):
+  - Payment(transaction.id,_paymentType,transaction.token,_releaseAmount,transaction.serviceId) (contracts/TalentLayerEscrow.sol#953)
+    - _reimburse(_transactionId,amount) (contracts/TalentLayerEscrow.sol#785)
+  - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
+    - _reimburse(_transactionId,amount) (contracts/TalentLayerEscrow.sol#785)
+Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802):
+  External calls:
+  - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+  - _release(_transactionId,amount) (contracts/TalentLayerEscrow.sol#788)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  External calls sending eth:
+  - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+  - _release(_transactionId,amount) (contracts/TalentLayerEscrow.sol#788)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  Event emitted after the call(s):
+  - OriginServiceFeeRateReleased(originServiceCreationPlatformId,transaction.serviceId,transaction.token,originServiceFeeRate) (contracts/TalentLayerEscrow.sol#905-910)
+    - _release(_transactionId,amount) (contracts/TalentLayerEscrow.sol#788)
+  - OriginValidatedProposalFeeRateReleased(originValidatedProposalPlatformId,transaction.serviceId,transaction.token,originServiceFeeRate) (contracts/TalentLayerEscrow.sol#911-916)
+    - _release(_transactionId,amount) (contracts/TalentLayerEscrow.sol#788)
+  - Payment(transaction.id,_paymentType,transaction.token,_releaseAmount,transaction.serviceId) (contracts/TalentLayerEscrow.sol#953)
+    - _release(_transactionId,amount) (contracts/TalentLayerEscrow.sol#788)
+  - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
+    - _release(_transactionId,amount) (contracts/TalentLayerEscrow.sol#788)
+Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802):
+  External calls:
+  - _reimburse(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#794)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  - _release(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#795)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  External calls sending eth:
+  - _reimburse(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#794)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  - _release(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#795)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  Event emitted after the call(s):
+  - OriginServiceFeeRateReleased(originServiceCreationPlatformId,transaction.serviceId,transaction.token,originServiceFeeRate) (contracts/TalentLayerEscrow.sol#905-910)
+    - _release(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#795)
+  - OriginValidatedProposalFeeRateReleased(originValidatedProposalPlatformId,transaction.serviceId,transaction.token,originServiceFeeRate) (contracts/TalentLayerEscrow.sol#911-916)
+    - _release(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#795)
+  - Payment(transaction.id,_paymentType,transaction.token,_releaseAmount,transaction.serviceId) (contracts/TalentLayerEscrow.sol#953)
+    - _release(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#795)
+  - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
+    - _release(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#795)
+Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802):
+  External calls:
+  - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+  - _reimburse(_transactionId,amount) (contracts/TalentLayerEscrow.sol#785)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+  - _release(_transactionId,amount) (contracts/TalentLayerEscrow.sol#788)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  - _reimburse(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#794)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  - _release(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#795)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+  - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+  External calls sending eth:
+  - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+  - _reimburse(_transactionId,amount) (contracts/TalentLayerEscrow.sol#785)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+  - _release(_transactionId,amount) (contracts/TalentLayerEscrow.sol#788)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  - _reimburse(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#794)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  - _release(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#795)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+  - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+  Event emitted after the call(s):
+  - RulingExecuted(_transactionId,_ruling) (contracts/TalentLayerEscrow.sol#801)
+Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
+  External calls:
+  - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
+  Event emitted after the call(s):
+  - Dispute(arbitrator,transaction.disputeId,_transactionId,_transactionId) (contracts/TalentLayerEscrow.sol#740)
+Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
+  External calls:
+  - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
+  - address(transaction.sender).call{value: extraFeeSender}() (contracts/TalentLayerEscrow.sol#746)
+  Event emitted after the call(s):
+  - ArbitrationFeePayment(_transactionId,ArbitrationFeePaymentType.Reimburse,Party.Sender,msg.value) (contracts/TalentLayerEscrow.sol#747)
+Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
+  External calls:
+  - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
+  - address(transaction.sender).call{value: extraFeeSender}() (contracts/TalentLayerEscrow.sol#746)
+  - address(transaction.receiver).call{value: extraFeeReceiver}() (contracts/TalentLayerEscrow.sol#754)
+  Event emitted after the call(s):
+  - ArbitrationFeePayment(_transactionId,ArbitrationFeePaymentType.Reimburse,Party.Receiver,msg.value) (contracts/TalentLayerEscrow.sol#755)
+Reentrancy in TalentLayerEscrow._reimburse(uint256,uint256) (contracts/TalentLayerEscrow.sol#867-877):
+  External calls:
+  - _safeTransferBalance(address(transaction.sender),transaction.token,totalReleaseAmount) (contracts/TalentLayerEscrow.sol#874)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+  - _afterPayment(_transactionId,PaymentType.Reimburse,_amount) (contracts/TalentLayerEscrow.sol#876)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  External calls sending eth:
+  - _safeTransferBalance(address(transaction.sender),transaction.token,totalReleaseAmount) (contracts/TalentLayerEscrow.sol#874)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  Event emitted after the call(s):
+  - Payment(transaction.id,_paymentType,transaction.token,_releaseAmount,transaction.serviceId) (contracts/TalentLayerEscrow.sol#953)
+    - _afterPayment(_transactionId,PaymentType.Reimburse,_amount) (contracts/TalentLayerEscrow.sol#876)
+  - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
+    - _afterPayment(_transactionId,PaymentType.Reimburse,_amount) (contracts/TalentLayerEscrow.sol#876)
+Reentrancy in TalentLayerEscrow._release(uint256,uint256) (contracts/TalentLayerEscrow.sol#852-859):
+  External calls:
+  - _safeTransferBalance(address(transaction.receiver),transaction.token,_amount) (contracts/TalentLayerEscrow.sol#856)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+  - _afterPayment(_transactionId,PaymentType.Release,_amount) (contracts/TalentLayerEscrow.sol#858)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+  External calls sending eth:
+  - _safeTransferBalance(address(transaction.receiver),transaction.token,_amount) (contracts/TalentLayerEscrow.sol#856)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  Event emitted after the call(s):
+  - Payment(transaction.id,_paymentType,transaction.token,_releaseAmount,transaction.serviceId) (contracts/TalentLayerEscrow.sol#953)
+    - _afterPayment(_transactionId,PaymentType.Release,_amount) (contracts/TalentLayerEscrow.sol#858)
+  - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
+    - _afterPayment(_transactionId,PaymentType.Release,_amount) (contracts/TalentLayerEscrow.sol#858)
+Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624):
+  External calls:
+  - address(transaction.sender).call{value: senderFee}() (contracts/TalentLayerEscrow.sol#613)
+  - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+    - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+    - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+    - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+    - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+  External calls sending eth:
+  - address(transaction.sender).call{value: senderFee}() (contracts/TalentLayerEscrow.sol#613)
+  - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+    - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+    - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+    - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+  Event emitted after the call(s):
+  - OriginServiceFeeRateReleased(originServiceCreationPlatformId,transaction.serviceId,transaction.token,originServiceFeeRate) (contracts/TalentLayerEscrow.sol#905-910)
+    - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+  - OriginValidatedProposalFeeRateReleased(originValidatedProposalPlatformId,transaction.serviceId,transaction.token,originServiceFeeRate) (contracts/TalentLayerEscrow.sol#911-916)
+    - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+  - Payment(transaction.id,_paymentType,transaction.token,_releaseAmount,transaction.serviceId) (contracts/TalentLayerEscrow.sol#953)
+    - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+  - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
+    - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+  - RulingExecuted(_transactionId,_ruling) (contracts/TalentLayerEscrow.sol#801)
+    - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624):
+  External calls:
+  - address(transaction.receiver).call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#620)
+  - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+    - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
+    - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+    - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+    - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+    - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+  External calls sending eth:
+  - address(transaction.receiver).call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#620)
+  - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+    - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+    - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+    - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+  Event emitted after the call(s):
+  - OriginServiceFeeRateReleased(originServiceCreationPlatformId,transaction.serviceId,transaction.token,originServiceFeeRate) (contracts/TalentLayerEscrow.sol#905-910)
+    - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+  - OriginValidatedProposalFeeRateReleased(originValidatedProposalPlatformId,transaction.serviceId,transaction.token,originServiceFeeRate) (contracts/TalentLayerEscrow.sol#911-916)
+    - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+  - Payment(transaction.id,_paymentType,transaction.token,_releaseAmount,transaction.serviceId) (contracts/TalentLayerEscrow.sol#953)
+    - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+  - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
+    - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+  - RulingExecuted(_transactionId,_ruling) (contracts/TalentLayerEscrow.sol#801)
+    - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+Reentrancy in TalentLayerEscrow.claim(uint256,address) (contracts/TalentLayerEscrow.sol#675-692):
+  External calls:
+  - _safeTransferBalance(recipient,_tokenAddress,amount) (contracts/TalentLayerEscrow.sol#689)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+    - IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
+  External calls sending eth:
+  - _safeTransferBalance(recipient,_tokenAddress,amount) (contracts/TalentLayerEscrow.sol#689)
+    - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+  Event emitted after the call(s):
+  - FeesClaimed(_platformId,_tokenAddress,amount) (contracts/TalentLayerEscrow.sol#691)
+Reentrancy in TalentLayerEscrow.createTransaction(uint256,uint256,string,string) (contracts/TalentLayerEscrow.sol#409-486):
+  External calls:
+  - talentLayerServiceContract.afterDeposit(_serviceId,_proposalId,transactionId) (contracts/TalentLayerEscrow.sol#474)
+  - require(bool,string)(IERC20(proposal.rateToken).transferFrom(sender,address(this),transactionAmount),Transfer must not fail) (contracts/TalentLayerEscrow.sol#477-480)
+  Event emitted after the call(s):
+  - MetaEvidence(_transactionId,_metaEvidence) (contracts/TalentLayerEscrow.sol#843)
+    - _afterCreateTransaction(service.ownerId,proposal.ownerId,transactionId,_metaEvidence) (contracts/TalentLayerEscrow.sol#483)
+  - TransactionCreated(_transactionId,_senderId,_receiverId,transaction.token,transaction.amount,transaction.serviceId,transaction.proposalId,protocolEscrowFeeRate,transaction.originServiceFeeRate,transaction.originValidatedProposalFeeRate,transaction.arbitrator,transaction.arbitratorExtraData,transaction.arbitrationFeeTimeout) (contracts/TalentLayerEscrow.sol#828-842)
+    - _afterCreateTransaction(service.ownerId,proposal.ownerId,transactionId,_metaEvidence) (contracts/TalentLayerEscrow.sol#483)
+Reentrancy in TalentLayerID.freeMint(uint256,address,string) (contracts/TalentLayerID.sol#285-292):
+  External calls:
+  - _safeMint(_userAddress,nextProfileId.current()) (contracts/TalentLayerID.sol#290)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  Event emitted after the call(s):
+  - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/TalentLayerID.sol#333)
+    - _afterMint(_userAddress,_handle,_platformId,0) (contracts/TalentLayerID.sol#291)
+Reentrancy in TalentLayerIDV2.freeMint(uint256,address,string) (contracts/tests/TalentLayerIDV2.sol#273-280):
+  External calls:
+  - _safeMint(_userAddress,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#278)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  Event emitted after the call(s):
+  - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/tests/TalentLayerIDV2.sol#321)
+    - _afterMint(_userAddress,_handle,_platformId,0) (contracts/tests/TalentLayerIDV2.sol#279)
+Reentrancy in TalentLayerID.mint(uint256,string) (contracts/TalentLayerID.sol#196-204):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#202)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  Event emitted after the call(s):
+  - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/TalentLayerID.sol#333)
+    - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#203)
+Reentrancy in TalentLayerPlatformID.mint(string) (contracts/TalentLayerPlatformID.sol#233-238):
+  External calls:
+  - _safeMint(msg.sender,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#236)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  Event emitted after the call(s):
+  - Mint(_platformAddress,platformId,_platformName,mintFee,minArbitrationFeeTimeout) (contracts/TalentLayerPlatformID.sol#436)
+    - _afterMint(_platformName,msg.sender) (contracts/TalentLayerPlatformID.sol#237)
+Reentrancy in TalentLayerReview.mint(uint256,uint256,string,uint256) (contracts/TalentLayerReview.sol#119-148):
+  External calls:
+  - _safeMint(sender,nextReviewId.current()) (contracts/TalentLayerReview.sol#146)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  Event emitted after the call(s):
+  - Mint(_serviceId,_to,reviewId,_rating,_reviewUri) (contracts/TalentLayerReview.sol#176)
+    - _afterMint(_serviceId,toId,_rating,_reviewUri) (contracts/TalentLayerReview.sol#147)
+Reentrancy in TalentLayerIDV2.mint(uint256,string) (contracts/tests/TalentLayerIDV2.sol#184-192):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#190)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  Event emitted after the call(s):
+  - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/tests/TalentLayerIDV2.sol#321)
+    - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#191)
+Reentrancy in TalentLayerPlatformID.mintForAddress(string,address) (contracts/TalentLayerPlatformID.sol#246-252):
+  External calls:
+  - _safeMint(_platformAddress,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#250)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  Event emitted after the call(s):
+  - Mint(_platformAddress,platformId,_platformName,mintFee,minArbitrationFeeTimeout) (contracts/TalentLayerPlatformID.sol#436)
+    - _afterMint(_platformName,_platformAddress) (contracts/TalentLayerPlatformID.sol#251)
+Reentrancy in TalentLayerID.whitelistMint(uint256,string,bytes32[]) (contracts/TalentLayerID.sol#212-223):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#221)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  Event emitted after the call(s):
+  - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/TalentLayerID.sol#333)
+    - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#222)
+Reentrancy in TalentLayerIDV2.whitelistMint(uint256,string,bytes32[]) (contracts/tests/TalentLayerIDV2.sol#200-211):
+  External calls:
+  - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#209)
+    - IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
+  Event emitted after the call(s):
+  - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/tests/TalentLayerIDV2.sol#321)
+    - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#210)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+
+TalentLayerEscrow.getTransactionDetails(uint256) (contracts/TalentLayerEscrow.sol#367-377) uses timestamp for comparisons
+  Dangerous comparisons:
+  - require(bool,string)(transactions.length > _transactionId,Invalid transaction id) (contracts/TalentLayerEscrow.sol#368)
+  - require(bool,string)(sender == transaction.sender || sender == transaction.receiver,You are not related to this transaction) (contracts/TalentLayerEscrow.sol#372-375)
+TalentLayerEscrow.createTransaction(uint256,uint256,string,string) (contracts/TalentLayerEscrow.sol#409-486) uses timestamp for comparisons
+  Dangerous comparisons:
+  - require(bool,string)(proposal.expirationDate >= block.timestamp,Proposal expired) (contracts/TalentLayerEscrow.sol#441)
+TalentLayerEscrow.payArbitrationFeeBySender(uint256) (contracts/TalentLayerEscrow.sol#534-561) uses timestamp for comparisons
+  Dangerous comparisons:
+  - require(bool,string)(address(transaction.arbitrator) != address(0),Arbitrator not set) (contracts/TalentLayerEscrow.sol#537)
+  - require(bool,string)(transaction.status < Status.DisputeCreated,Dispute has already been created or because the transaction has been executed) (contracts/TalentLayerEscrow.sol#538-541)
+  - require(bool,string)(_msgSender() == transaction.sender,The caller must be the sender) (contracts/TalentLayerEscrow.sol#542)
+  - require(bool,string)(transaction.senderFee == arbitrationCost,The sender fee must be equal to the arbitration cost) (contracts/TalentLayerEscrow.sol#547)
+  - transaction.receiverFee < arbitrationCost (contracts/TalentLayerEscrow.sol#554)
+TalentLayerEscrow.payArbitrationFeeByReceiver(uint256) (contracts/TalentLayerEscrow.sol#568-595) uses timestamp for comparisons
+  Dangerous comparisons:
+  - require(bool,string)(address(transaction.arbitrator) != address(0),Arbitrator not set) (contracts/TalentLayerEscrow.sol#571)
+  - require(bool,string)(transaction.status < Status.DisputeCreated,Dispute has already been created or because the transaction has been executed) (contracts/TalentLayerEscrow.sol#572-575)
+  - require(bool,string)(_msgSender() == transaction.receiver,The caller must be the receiver) (contracts/TalentLayerEscrow.sol#576)
+  - require(bool,string)(transaction.receiverFee == arbitrationCost,The receiver fee must be equal to the arbitration cost) (contracts/TalentLayerEscrow.sol#581)
+  - transaction.senderFee < arbitrationCost (contracts/TalentLayerEscrow.sol#588)
+TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624) uses timestamp for comparisons
+  Dangerous comparisons:
+  - require(bool,string)(block.timestamp - transaction.lastInteraction >= transaction.arbitrationFeeTimeout,Timeout time has not passed yet) (contracts/TalentLayerEscrow.sol#604-607)
+TalentLayerEscrow._validatePayment(uint256,TalentLayerEscrow.PaymentType,uint256,uint256) (contracts/TalentLayerEscrow.sol#926-943) uses timestamp for comparisons
+  Dangerous comparisons:
+  - require(bool,string)(transactions.length > _transaction.id,Invalid transaction id) (contracts/TalentLayerEscrow.sol#939)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+
+ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#434-456) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#448-450)
+AddressUpgradeable._revert(bytes,string) (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#206-218) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#211-214)
+Base64Upgradeable.encode(bytes) (node_modules/@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol#20-91) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol#39-88)
+StorageSlotUpgradeable.getAddressSlot(bytes32) (node_modules/@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol#52-57) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol#54-56)
+StorageSlotUpgradeable.getBooleanSlot(bytes32) (node_modules/@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol#62-67) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol#64-66)
+StorageSlotUpgradeable.getBytes32Slot(bytes32) (node_modules/@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol#72-77) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol#74-76)
+StorageSlotUpgradeable.getUint256Slot(bytes32) (node_modules/@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol#82-87) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol#84-86)
+StringsUpgradeable.toString(uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol#18-38) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol#24-26)
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol#30-32)
+MerkleProofUpgradeable._efficientHash(bytes32,bytes32) (node_modules/@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol#215-222) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol#217-221)
+MathUpgradeable.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#55-135) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#66-70)
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#86-93)
+  - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#100-109)
+Strings.toString(uint256) (node_modules/@openzeppelin/contracts/utils/Strings.sol#18-38) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts/utils/Strings.sol#24-26)
+  - INLINE ASM (node_modules/@openzeppelin/contracts/utils/Strings.sol#30-32)
+ECDSA.tryRecover(bytes32,bytes) (node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol#55-72) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol#63-67)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#55-135) uses assembly
+  - INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#66-70)
+  - INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#86-93)
+  - INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#100-109)
+TalentLayerArbitrator.bytesToUint(bytes) (contracts/TalentLayerArbitrator.sol#164-171) uses assembly
+  - INLINE ASM (contracts/TalentLayerArbitrator.sol#167-169)
+ERC2771Recipient._msgSender() (contracts/libs/ERC2771Recipient.sol#54-65) uses assembly
+  - INLINE ASM (contracts/libs/ERC2771Recipient.sol#59-61)
+ERC2771RecipientUpgradeable._msgSender() (contracts/libs/ERC2771RecipientUpgradeable.sol#55-66) uses assembly
+  - INLINE ASM (contracts/libs/ERC2771RecipientUpgradeable.sol#60-62)
+MockForwarder.execute(MockForwarder.ForwardRequest) (contracts/mocks/MockForwarder.sol#25-36) uses assembly
+  - INLINE ASM (contracts/mocks/MockForwarder.sol#30-32)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+
+TalentLayerService.updateAllowedTokenList(address,bool,uint256) (contracts/TalentLayerService.sol#372-384) compares to a boolean constant:
+  -_tokenAddress == address(0) && _status == false (contracts/TalentLayerService.sol#377)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#boolean-equality
+
+Different versions of Solidity are used:
+  - Version used: ['>=0.6.0', '^0.8.0', '^0.8.1', '^0.8.2', '^0.8.9']
+  - >=0.6.0 (node_modules/@opengsn/contracts/src/interfaces/IERC2771Recipient.sol#2)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/interfaces/draft-IERC1822Upgradeable.sol#4)
+  - ^0.8.2 (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/proxy/beacon/IBeaconUpgradeable.sol#4)
+  - ^0.8.2 (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721MetadataUpgradeable.sol#4)
+  - ^0.8.1 (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts/access/Ownable.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts/utils/Context.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts/utils/Strings.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol#4)
+  - ^0.8.0 (node_modules/@openzeppelin/contracts/utils/math/Math.sol#4)
+  - ^0.8.9 (contracts/Arbitrable.sol#2)
+  - ^0.8.9 (contracts/Arbitrator.sol#2)
+  - ^0.8.9 (contracts/TalentLayerArbitrator.sol#2)
+  - ^0.8.9 (contracts/TalentLayerEscrow.sol#2)
+  - ^0.8.9 (contracts/TalentLayerID.sol#2)
+  - ^0.8.9 (contracts/TalentLayerPlatformID.sol#2)
+  - ^0.8.9 (contracts/TalentLayerReview.sol#4)
+  - ^0.8.9 (contracts/TalentLayerService.sol#2)
+  - ^0.8.9 (contracts/interfaces/IArbitrable.sol#2)
+  - ^0.8.9 (contracts/interfaces/ITalentLayerEscrow.sol#2)
+  - ^0.8.9 (contracts/interfaces/ITalentLayerID.sol#2)
+  - ^0.8.9 (contracts/interfaces/ITalentLayerPlatformID.sol#2)
+  - ^0.8.0 (contracts/interfaces/ITalentLayerReview.sol#2)
+  - ^0.8.9 (contracts/interfaces/ITalentLayerService.sol#2)
+  - ^0.8.9 (contracts/libs/ERC2771Recipient.sol#2)
+  - ^0.8.9 (contracts/libs/ERC2771RecipientUpgradeable.sol#2)
+  - ^0.8.9 (contracts/mocks/MockForwarder.sol#2)
+  - ^0.8.9 (contracts/tests/SimpleERC20.sol#2)
+  - ^0.8.9 (contracts/tests/TalentLayerIDV2.sol#2)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+
+ERC2771Recipient._msgData() (contracts/libs/ERC2771Recipient.sol#68-74) is never used and should be removed
+ERC2771RecipientUpgradeable._msgData() (contracts/libs/ERC2771RecipientUpgradeable.sol#69-81) is never used and should be removed
+TalentLayerID._burn(uint256) (contracts/TalentLayerID.sol#391) is never used and should be removed
+TalentLayerID._msgData() (contracts/TalentLayerID.sol#449-457) is never used and should be removed
+TalentLayerIDV2._burn(uint256) (contracts/tests/TalentLayerIDV2.sol#392) is never used and should be removed
+TalentLayerIDV2._msgData() (contracts/tests/TalentLayerIDV2.sol#450-458) is never used and should be removed
+TalentLayerReview._burn(uint256) (contracts/TalentLayerReview.sol#216) is never used and should be removed
+TalentLayerReview._msgData() (contracts/TalentLayerReview.sol#258-266) is never used and should be removed
+TalentLayerService._msgData() (contracts/TalentLayerService.sol#443-451) is never used and should be removed
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dead-code
+
+Pragma version>=0.6.0 (node_modules/@opengsn/contracts/src/interfaces/IERC2771Recipient.sol#2) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/interfaces/draft-IERC1822Upgradeable.sol#4) allows old versions
+Pragma version^0.8.2 (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/proxy/beacon/IBeaconUpgradeable.sol#4) allows old versions
+Pragma version^0.8.2 (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721MetadataUpgradeable.sol#4) allows old versions
+Pragma version^0.8.1 (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/access/Ownable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/utils/Context.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/utils/Strings.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/utils/math/Math.sol#4) allows old versions
+Pragma version^0.8.9 (contracts/Arbitrable.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/Arbitrator.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/TalentLayerArbitrator.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/TalentLayerEscrow.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/TalentLayerID.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/TalentLayerPlatformID.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/TalentLayerReview.sol#4) allows old versions
+Pragma version^0.8.9 (contracts/TalentLayerService.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/interfaces/IArbitrable.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/interfaces/ITalentLayerEscrow.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/interfaces/ITalentLayerID.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/interfaces/ITalentLayerPlatformID.sol#2) allows old versions
+Pragma version^0.8.0 (contracts/interfaces/ITalentLayerReview.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/interfaces/ITalentLayerService.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/libs/ERC2771Recipient.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/libs/ERC2771RecipientUpgradeable.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/mocks/MockForwarder.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/tests/SimpleERC20.sol#2) allows old versions
+Pragma version^0.8.9 (contracts/tests/TalentLayerIDV2.sol#2) allows old versions
+solc-0.8.17 is not recommended for deployment
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+
+Low level call in ERC1967UpgradeUpgradeable._functionDelegateCall(address,bytes) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#198-204):
+  - (success,returndata) = target.delegatecall(data) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#202)
+Low level call in AddressUpgradeable.sendValue(address,uint256) (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#60-65):
+  - (success) = recipient.call{value: amount}() (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#63)
+Low level call in AddressUpgradeable.functionCallWithValue(address,bytes,uint256,string) (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#128-137):
+  - (success,returndata) = target.call{value: value}(data) (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#135)
+Low level call in AddressUpgradeable.functionStaticCall(address,bytes,string) (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#155-162):
+  - (success,returndata) = target.staticcall(data) (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#160)
+Low level call in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624):
+  - address(transaction.sender).call{value: senderFee}() (contracts/TalentLayerEscrow.sol#613)
+  - address(transaction.receiver).call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#620)
+Low level call in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
+  - address(transaction.sender).call{value: extraFeeSender}() (contracts/TalentLayerEscrow.sol#746)
+  - address(transaction.receiver).call{value: extraFeeReceiver}() (contracts/TalentLayerEscrow.sol#754)
+Low level call in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802):
+  - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
+  - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
+  - sender.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#797)
+  - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
+Low level call in TalentLayerEscrow._safeTransferBalance(address,address,uint256) (contracts/TalentLayerEscrow.sol#967-973):
+  - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+Low level call in TalentLayerID.withdraw() (contracts/TalentLayerID.sol#274-277):
+  - (sent) = address(_msgSender()).call{value: address(this).balance}() (contracts/TalentLayerID.sol#275)
+Low level call in TalentLayerPlatformID.withdraw() (contracts/TalentLayerPlatformID.sol#383-386):
+  - (sent) = address(msg.sender).call{value: address(this).balance}() (contracts/TalentLayerPlatformID.sol#384)
+Low level call in MockForwarder.execute(MockForwarder.ForwardRequest) (contracts/mocks/MockForwarder.sol#25-36):
+  - (success,ret) = req.to.call{gas: req.gas,value: req.value}(callData) (contracts/mocks/MockForwarder.sol#27)
+Low level call in TalentLayerIDV2.withdraw() (contracts/tests/TalentLayerIDV2.sol#262-265):
+  - (sent) = address(_msgSender()).call{value: address(this).balance}() (contracts/tests/TalentLayerIDV2.sol#263)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+
+TalentLayerReview (contracts/TalentLayerReview.sol#25-296) should inherit from ITalentLayerReview (contracts/interfaces/ITalentLayerReview.sol#8-25)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance
+
+Function AccessControlUpgradeable.__AccessControl_init() (node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol#51-52) is not in mixedCase
+Function AccessControlUpgradeable.__AccessControl_init_unchained() (node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol#54-55) is not in mixedCase
+Variable AccessControlUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol#259) is not in mixedCase
+Function OwnableUpgradeable.__Ownable_init() (node_modules/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol#29-31) is not in mixedCase
+Function OwnableUpgradeable.__Ownable_init_unchained() (node_modules/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol#33-35) is not in mixedCase
+Variable OwnableUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol#94) is not in mixedCase
+Function ERC1967UpgradeUpgradeable.__ERC1967Upgrade_init() (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#21-22) is not in mixedCase
+Function ERC1967UpgradeUpgradeable.__ERC1967Upgrade_init_unchained() (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#24-25) is not in mixedCase
+Variable ERC1967UpgradeUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#211) is not in mixedCase
+Function UUPSUpgradeable.__UUPSUpgradeable_init() (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#23-24) is not in mixedCase
+Function UUPSUpgradeable.__UUPSUpgradeable_init_unchained() (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#26-27) is not in mixedCase
+Variable UUPSUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#107) is not in mixedCase
+Variable UUPSUpgradeable.__self (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#29) is not in mixedCase
+Function ERC721Upgradeable.__ERC721_init(string,string) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#45-47) is not in mixedCase
+Function ERC721Upgradeable.__ERC721_init_unchained(string,string) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#49-52) is not in mixedCase
+Variable ERC721Upgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#514) is not in mixedCase
+Function ContextUpgradeable.__Context_init() (node_modules/@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol#18-19) is not in mixedCase
+Function ContextUpgradeable.__Context_init_unchained() (node_modules/@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol#21-22) is not in mixedCase
+Variable ContextUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol#36) is not in mixedCase
+Function ERC165Upgradeable.__ERC165_init() (node_modules/@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol#24-25) is not in mixedCase
+Function ERC165Upgradeable.__ERC165_init_unchained() (node_modules/@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol#27-28) is not in mixedCase
+Variable ERC165Upgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol#41) is not in mixedCase
+Parameter Arbitrable.rule(uint256,uint256)._disputeID (contracts/Arbitrable.sol#38) is not in mixedCase
+Parameter Arbitrable.rule(uint256,uint256)._ruling (contracts/Arbitrable.sol#38) is not in mixedCase
+Parameter Arbitrator.createDispute(uint256,bytes)._extraData (contracts/Arbitrator.sol#56) is not in mixedCase
+Parameter Arbitrator.appeal(uint256,bytes)._disputeID (contracts/Arbitrator.sol#70) is not in mixedCase
+Parameter Arbitrator.appeal(uint256,bytes)._extraData (contracts/Arbitrator.sol#71) is not in mixedCase
+Parameter TalentLayerArbitrator.setArbitrationPrice(uint256,uint256)._platformId (contracts/TalentLayerArbitrator.sol#60) is not in mixedCase
+Parameter TalentLayerArbitrator.setArbitrationPrice(uint256,uint256)._arbitrationPrice (contracts/TalentLayerArbitrator.sol#60) is not in mixedCase
+Parameter TalentLayerArbitrator.arbitrationCost(bytes)._extraData (contracts/TalentLayerArbitrator.sol#73) is not in mixedCase
+Parameter TalentLayerArbitrator.createDispute(uint256,bytes)._choices (contracts/TalentLayerArbitrator.sol#95) is not in mixedCase
+Parameter TalentLayerArbitrator.createDispute(uint256,bytes)._extraData (contracts/TalentLayerArbitrator.sol#96) is not in mixedCase
+Parameter TalentLayerArbitrator.giveRuling(uint256,uint256)._disputeID (contracts/TalentLayerArbitrator.sol#135) is not in mixedCase
+Parameter TalentLayerArbitrator.giveRuling(uint256,uint256)._ruling (contracts/TalentLayerArbitrator.sol#135) is not in mixedCase
+Parameter TalentLayerArbitrator.disputeStatus(uint256)._disputeID (contracts/TalentLayerArbitrator.sol#149) is not in mixedCase
+Parameter TalentLayerArbitrator.currentRuling(uint256)._disputeID (contracts/TalentLayerArbitrator.sol#157) is not in mixedCase
+Parameter TalentLayerEscrow.initialize(address,address,address,address)._talentLayerServiceAddress (contracts/TalentLayerEscrow.sol#327) is not in mixedCase
+Parameter TalentLayerEscrow.initialize(address,address,address,address)._talentLayerIDAddress (contracts/TalentLayerEscrow.sol#328) is not in mixedCase
+Parameter TalentLayerEscrow.initialize(address,address,address,address)._talentLayerPlatformIDAddress (contracts/TalentLayerEscrow.sol#329) is not in mixedCase
+Parameter TalentLayerEscrow.initialize(address,address,address,address)._protocolWallet (contracts/TalentLayerEscrow.sol#330) is not in mixedCase
+Parameter TalentLayerEscrow.getClaimableFeeBalance(address)._token (contracts/TalentLayerEscrow.sol#350) is not in mixedCase
+Parameter TalentLayerEscrow.getTransactionDetails(uint256)._transactionId (contracts/TalentLayerEscrow.sol#367) is not in mixedCase
+Parameter TalentLayerEscrow.updateProtocolEscrowFeeRate(uint16)._protocolEscrowFeeRate (contracts/TalentLayerEscrow.sol#386) is not in mixedCase
+Parameter TalentLayerEscrow.updateProtocolWallet(address)._protocolWallet (contracts/TalentLayerEscrow.sol#396) is not in mixedCase
+Parameter TalentLayerEscrow.createTransaction(uint256,uint256,string,string)._serviceId (contracts/TalentLayerEscrow.sol#410) is not in mixedCase
+Parameter TalentLayerEscrow.createTransaction(uint256,uint256,string,string)._proposalId (contracts/TalentLayerEscrow.sol#411) is not in mixedCase
+Parameter TalentLayerEscrow.createTransaction(uint256,uint256,string,string)._metaEvidence (contracts/TalentLayerEscrow.sol#412) is not in mixedCase
+Parameter TalentLayerEscrow.createTransaction(uint256,uint256,string,string)._originDataUri (contracts/TalentLayerEscrow.sol#413) is not in mixedCase
+Parameter TalentLayerEscrow.release(uint256,uint256,uint256)._profileId (contracts/TalentLayerEscrow.sol#496) is not in mixedCase
+Parameter TalentLayerEscrow.release(uint256,uint256,uint256)._transactionId (contracts/TalentLayerEscrow.sol#497) is not in mixedCase
+Parameter TalentLayerEscrow.release(uint256,uint256,uint256)._amount (contracts/TalentLayerEscrow.sol#498) is not in mixedCase
+Parameter TalentLayerEscrow.reimburse(uint256,uint256,uint256)._profileId (contracts/TalentLayerEscrow.sol#516) is not in mixedCase
+Parameter TalentLayerEscrow.reimburse(uint256,uint256,uint256)._transactionId (contracts/TalentLayerEscrow.sol#517) is not in mixedCase
+Parameter TalentLayerEscrow.reimburse(uint256,uint256,uint256)._amount (contracts/TalentLayerEscrow.sol#518) is not in mixedCase
+Parameter TalentLayerEscrow.payArbitrationFeeBySender(uint256)._transactionId (contracts/TalentLayerEscrow.sol#534) is not in mixedCase
+Parameter TalentLayerEscrow.payArbitrationFeeByReceiver(uint256)._transactionId (contracts/TalentLayerEscrow.sol#568) is not in mixedCase
+Parameter TalentLayerEscrow.arbitrationFeeTimeout(uint256)._transactionId (contracts/TalentLayerEscrow.sol#601) is not in mixedCase
+Parameter TalentLayerEscrow.submitEvidence(uint256,uint256,string)._profileId (contracts/TalentLayerEscrow.sol#633) is not in mixedCase
+Parameter TalentLayerEscrow.submitEvidence(uint256,uint256,string)._transactionId (contracts/TalentLayerEscrow.sol#634) is not in mixedCase
+Parameter TalentLayerEscrow.submitEvidence(uint256,uint256,string)._evidence (contracts/TalentLayerEscrow.sol#635) is not in mixedCase
+Parameter TalentLayerEscrow.appeal(uint256)._transactionId (contracts/TalentLayerEscrow.sol#659) is not in mixedCase
+Parameter TalentLayerEscrow.claim(uint256,address)._platformId (contracts/TalentLayerEscrow.sol#675) is not in mixedCase
+Parameter TalentLayerEscrow.claim(uint256,address)._tokenAddress (contracts/TalentLayerEscrow.sol#675) is not in mixedCase
+Parameter TalentLayerEscrow.rule(uint256,uint256)._disputeID (contracts/TalentLayerEscrow.sol#709) is not in mixedCase
+Parameter TalentLayerEscrow.rule(uint256,uint256)._ruling (contracts/TalentLayerEscrow.sol#709) is not in mixedCase
+Parameter TalentLayerID.initialize(address)._talentLayerPlatformIdAddress (contracts/TalentLayerID.sol#108) is not in mixedCase
+Parameter TalentLayerID.numberMinted(address)._user (contracts/TalentLayerID.sol#125) is not in mixedCase
+Parameter TalentLayerID.getOriginatorPlatformIdByAddress(address)._address (contracts/TalentLayerID.sol#140) is not in mixedCase
+Parameter TalentLayerID.isValid(uint256)._profileId (contracts/TalentLayerID.sol#148) is not in mixedCase
+Parameter TalentLayerID.isDelegate(uint256,address)._profileId (contracts/TalentLayerID.sol#157) is not in mixedCase
+Parameter TalentLayerID.isDelegate(uint256,address)._address (contracts/TalentLayerID.sol#157) is not in mixedCase
+Parameter TalentLayerID.isOwnerOrDelegate(uint256,address)._profileId (contracts/TalentLayerID.sol#166) is not in mixedCase
+Parameter TalentLayerID.isOwnerOrDelegate(uint256,address)._address (contracts/TalentLayerID.sol#166) is not in mixedCase
+Parameter TalentLayerID.isWhitelisted(address,string,bytes32[])._address (contracts/TalentLayerID.sol#177) is not in mixedCase
+Parameter TalentLayerID.isWhitelisted(address,string,bytes32[])._handle (contracts/TalentLayerID.sol#178) is not in mixedCase
+Parameter TalentLayerID.isWhitelisted(address,string,bytes32[])._proof (contracts/TalentLayerID.sol#179) is not in mixedCase
+Parameter TalentLayerID.mint(uint256,string)._platformId (contracts/TalentLayerID.sol#197) is not in mixedCase
+Parameter TalentLayerID.mint(uint256,string)._handle (contracts/TalentLayerID.sol#198) is not in mixedCase
+Parameter TalentLayerID.whitelistMint(uint256,string,bytes32[])._platformId (contracts/TalentLayerID.sol#213) is not in mixedCase
+Parameter TalentLayerID.whitelistMint(uint256,string,bytes32[])._handle (contracts/TalentLayerID.sol#214) is not in mixedCase
+Parameter TalentLayerID.whitelistMint(uint256,string,bytes32[])._proof (contracts/TalentLayerID.sol#215) is not in mixedCase
+Parameter TalentLayerID.updateProfileData(uint256,string)._profileId (contracts/TalentLayerID.sol#231) is not in mixedCase
+Parameter TalentLayerID.updateProfileData(uint256,string)._newCid (contracts/TalentLayerID.sol#231) is not in mixedCase
+Parameter TalentLayerID.addDelegate(uint256,address)._profileId (contracts/TalentLayerID.sol#243) is not in mixedCase
+Parameter TalentLayerID.addDelegate(uint256,address)._delegate (contracts/TalentLayerID.sol#243) is not in mixedCase
+Parameter TalentLayerID.removeDelegate(uint256,address)._profileId (contracts/TalentLayerID.sol#254) is not in mixedCase
+Parameter TalentLayerID.removeDelegate(uint256,address)._delegate (contracts/TalentLayerID.sol#254) is not in mixedCase
+Parameter TalentLayerID.updateMintFee(uint256)._mintFee (contracts/TalentLayerID.sol#266) is not in mixedCase
+Parameter TalentLayerID.freeMint(uint256,address,string)._platformId (contracts/TalentLayerID.sol#286) is not in mixedCase
+Parameter TalentLayerID.freeMint(uint256,address,string)._userAddress (contracts/TalentLayerID.sol#287) is not in mixedCase
+Parameter TalentLayerID.freeMint(uint256,address,string)._handle (contracts/TalentLayerID.sol#288) is not in mixedCase
+Parameter TalentLayerID.updateMintStatus(TalentLayerID.MintStatus)._mintStatus (contracts/TalentLayerID.sol#306) is not in mixedCase
+Parameter TalentLayerPlatformID.numberMinted(address)._platformAddress (contracts/TalentLayerPlatformID.sol#164) is not in mixedCase
+Parameter TalentLayerPlatformID.getOriginServiceFeeRate(uint256)._platformId (contracts/TalentLayerPlatformID.sol#173) is not in mixedCase
+Parameter TalentLayerPlatformID.getOriginValidatedProposalFeeRate(uint256)._platformId (contracts/TalentLayerPlatformID.sol#184) is not in mixedCase
+Parameter TalentLayerPlatformID.getServicePostingFee(uint256)._platformId (contracts/TalentLayerPlatformID.sol#194) is not in mixedCase
+Parameter TalentLayerPlatformID.getProposalPostingFee(uint256)._platformId (contracts/TalentLayerPlatformID.sol#204) is not in mixedCase
+Parameter TalentLayerPlatformID.getPlatform(uint256)._platformId (contracts/TalentLayerPlatformID.sol#214) is not in mixedCase
+Parameter TalentLayerPlatformID.mint(string)._platformName (contracts/TalentLayerPlatformID.sol#234) is not in mixedCase
+Parameter TalentLayerPlatformID.mintForAddress(string,address)._platformName (contracts/TalentLayerPlatformID.sol#247) is not in mixedCase
+Parameter TalentLayerPlatformID.mintForAddress(string,address)._platformAddress (contracts/TalentLayerPlatformID.sol#248) is not in mixedCase
+Parameter TalentLayerPlatformID.updateProfileData(uint256,string)._platformId (contracts/TalentLayerPlatformID.sol#260) is not in mixedCase
+Parameter TalentLayerPlatformID.updateProfileData(uint256,string)._newCid (contracts/TalentLayerPlatformID.sol#260) is not in mixedCase
+Parameter TalentLayerPlatformID.updateOriginServiceFeeRate(uint256,uint16)._platformId (contracts/TalentLayerPlatformID.sol#273) is not in mixedCase
+Parameter TalentLayerPlatformID.updateOriginServiceFeeRate(uint256,uint16)._originServiceFeeRate (contracts/TalentLayerPlatformID.sol#273) is not in mixedCase
+Parameter TalentLayerPlatformID.updateOriginValidatedProposalFeeRate(uint256,uint16)._platformId (contracts/TalentLayerPlatformID.sol#284) is not in mixedCase
+Parameter TalentLayerPlatformID.updateOriginValidatedProposalFeeRate(uint256,uint16)._originValidatedProposalFeeRate (contracts/TalentLayerPlatformID.sol#284) is not in mixedCase
+Parameter TalentLayerPlatformID.updateArbitrator(uint256,Arbitrator,bytes)._platformId (contracts/TalentLayerPlatformID.sol#297) is not in mixedCase
+Parameter TalentLayerPlatformID.updateArbitrator(uint256,Arbitrator,bytes)._arbitrator (contracts/TalentLayerPlatformID.sol#297) is not in mixedCase
+Parameter TalentLayerPlatformID.updateArbitrator(uint256,Arbitrator,bytes)._extraData (contracts/TalentLayerPlatformID.sol#297) is not in mixedCase
+Parameter TalentLayerPlatformID.updateArbitrationFeeTimeout(uint256,uint256)._platformId (contracts/TalentLayerPlatformID.sol#316) is not in mixedCase
+Parameter TalentLayerPlatformID.updateArbitrationFeeTimeout(uint256,uint256)._arbitrationFeeTimeout (contracts/TalentLayerPlatformID.sol#316) is not in mixedCase
+Parameter TalentLayerPlatformID.updateServicePostingFee(uint256,uint256)._platformId (contracts/TalentLayerPlatformID.sol#332) is not in mixedCase
+Parameter TalentLayerPlatformID.updateServicePostingFee(uint256,uint256)._servicePostingFee (contracts/TalentLayerPlatformID.sol#332) is not in mixedCase
+Parameter TalentLayerPlatformID.updateProposalPostingFee(uint256,uint256)._platformId (contracts/TalentLayerPlatformID.sol#344) is not in mixedCase
+Parameter TalentLayerPlatformID.updateProposalPostingFee(uint256,uint256)._proposalPostingFee (contracts/TalentLayerPlatformID.sol#344) is not in mixedCase
+Parameter TalentLayerPlatformID.whitelistUser(address)._user (contracts/TalentLayerPlatformID.sol#357) is not in mixedCase
+Parameter TalentLayerPlatformID.updateMintStatus(TalentLayerPlatformID.MintStatus)._mintStatus (contracts/TalentLayerPlatformID.sol#366) is not in mixedCase
+Parameter TalentLayerPlatformID.updateMintFee(uint256)._mintFee (contracts/TalentLayerPlatformID.sol#375) is not in mixedCase
+Parameter TalentLayerPlatformID.addArbitrator(address,bool)._arbitrator (contracts/TalentLayerPlatformID.sol#394) is not in mixedCase
+Parameter TalentLayerPlatformID.addArbitrator(address,bool)._isInternal (contracts/TalentLayerPlatformID.sol#394) is not in mixedCase
+Parameter TalentLayerPlatformID.removeArbitrator(address)._arbitrator (contracts/TalentLayerPlatformID.sol#404) is not in mixedCase
+Parameter TalentLayerPlatformID.updateMinArbitrationFeeTimeout(uint256)._minArbitrationFeeTimeout (contracts/TalentLayerPlatformID.sol#414) is not in mixedCase
+Parameter TalentLayerPlatformID.isValid(uint256)._platformId (contracts/TalentLayerPlatformID.sol#465) is not in mixedCase
+Parameter TalentLayerReview.initialize(address,address)._talentLayerIdAddress (contracts/TalentLayerReview.sol#81) is not in mixedCase
+Parameter TalentLayerReview.initialize(address,address)._talentLayerServiceAddress (contracts/TalentLayerReview.sol#81) is not in mixedCase
+Parameter TalentLayerReview.getReview(uint256)._reviewId (contracts/TalentLayerReview.sol#97) is not in mixedCase
+Parameter TalentLayerReview.mint(uint256,uint256,string,uint256)._profileId (contracts/TalentLayerReview.sol#120) is not in mixedCase
+Parameter TalentLayerReview.mint(uint256,uint256,string,uint256)._serviceId (contracts/TalentLayerReview.sol#121) is not in mixedCase
+Parameter TalentLayerReview.mint(uint256,uint256,string,uint256)._reviewUri (contracts/TalentLayerReview.sol#122) is not in mixedCase
+Parameter TalentLayerReview.mint(uint256,uint256,string,uint256)._rating (contracts/TalentLayerReview.sol#123) is not in mixedCase
+Parameter TalentLayerService.initialize(address,address)._talentLayerIdAddress (contracts/TalentLayerService.sol#187) is not in mixedCase
+Parameter TalentLayerService.initialize(address,address)._talentLayerPlatformIdAddress (contracts/TalentLayerService.sol#187) is not in mixedCase
+Parameter TalentLayerService.getService(uint256)._serviceId (contracts/TalentLayerService.sol#203) is not in mixedCase
+Parameter TalentLayerService.getProposal(uint256,uint256)._serviceId (contracts/TalentLayerService.sol#213) is not in mixedCase
+Parameter TalentLayerService.getProposal(uint256,uint256)._proposalId (contracts/TalentLayerService.sol#213) is not in mixedCase
+Parameter TalentLayerService.isTokenAllowed(address)._tokenAddress (contracts/TalentLayerService.sol#221) is not in mixedCase
+Parameter TalentLayerService.createService(uint256,uint256,string)._profileId (contracts/TalentLayerService.sol#234) is not in mixedCase
+Parameter TalentLayerService.createService(uint256,uint256,string)._platformId (contracts/TalentLayerService.sol#235) is not in mixedCase
+Parameter TalentLayerService.createService(uint256,uint256,string)._dataUri (contracts/TalentLayerService.sol#236) is not in mixedCase
+Parameter TalentLayerService.createProposal(uint256,uint256,address,uint256,uint16,string,uint256)._profileId (contracts/TalentLayerService.sol#267) is not in mixedCase
+Parameter TalentLayerService.createProposal(uint256,uint256,address,uint256,uint16,string,uint256)._serviceId (contracts/TalentLayerService.sol#268) is not in mixedCase
+Parameter TalentLayerService.createProposal(uint256,uint256,address,uint256,uint16,string,uint256)._rateToken (contracts/TalentLayerService.sol#269) is not in mixedCase
+Parameter TalentLayerService.createProposal(uint256,uint256,address,uint256,uint16,string,uint256)._rateAmount (contracts/TalentLayerService.sol#270) is not in mixedCase
+Parameter TalentLayerService.createProposal(uint256,uint256,address,uint256,uint16,string,uint256)._platformId (contracts/TalentLayerService.sol#271) is not in mixedCase
+Parameter TalentLayerService.createProposal(uint256,uint256,address,uint256,uint16,string,uint256)._dataUri (contracts/TalentLayerService.sol#272) is not in mixedCase
+Parameter TalentLayerService.createProposal(uint256,uint256,address,uint256,uint16,string,uint256)._expirationDate (contracts/TalentLayerService.sol#273) is not in mixedCase
+Parameter TalentLayerService.updateProposal(uint256,uint256,address,uint256,string,uint256)._profileId (contracts/TalentLayerService.sol#322) is not in mixedCase
+Parameter TalentLayerService.updateProposal(uint256,uint256,address,uint256,string,uint256)._serviceId (contracts/TalentLayerService.sol#323) is not in mixedCase
+Parameter TalentLayerService.updateProposal(uint256,uint256,address,uint256,string,uint256)._rateToken (contracts/TalentLayerService.sol#324) is not in mixedCase
+Parameter TalentLayerService.updateProposal(uint256,uint256,address,uint256,string,uint256)._rateAmount (contracts/TalentLayerService.sol#325) is not in mixedCase
+Parameter TalentLayerService.updateProposal(uint256,uint256,address,uint256,string,uint256)._dataUri (contracts/TalentLayerService.sol#326) is not in mixedCase
+Parameter TalentLayerService.updateProposal(uint256,uint256,address,uint256,string,uint256)._expirationDate (contracts/TalentLayerService.sol#327) is not in mixedCase
+Parameter TalentLayerService.afterDeposit(uint256,uint256,uint256)._serviceId (contracts/TalentLayerService.sol#353) is not in mixedCase
+Parameter TalentLayerService.afterDeposit(uint256,uint256,uint256)._proposalId (contracts/TalentLayerService.sol#354) is not in mixedCase
+Parameter TalentLayerService.afterDeposit(uint256,uint256,uint256)._transactionId (contracts/TalentLayerService.sol#355) is not in mixedCase
+Parameter TalentLayerService.updateAllowedTokenList(address,bool,uint256)._tokenAddress (contracts/TalentLayerService.sol#373) is not in mixedCase
+Parameter TalentLayerService.updateAllowedTokenList(address,bool,uint256)._status (contracts/TalentLayerService.sol#374) is not in mixedCase
+Parameter TalentLayerService.updateAllowedTokenList(address,bool,uint256)._minimumTransactionAmount (contracts/TalentLayerService.sol#375) is not in mixedCase
+Parameter TalentLayerService.afterFullPayment(uint256)._serviceId (contracts/TalentLayerService.sol#390) is not in mixedCase
+Parameter TalentLayerService.updateServiceData(uint256,uint256,string)._profileId (contracts/TalentLayerService.sol#402) is not in mixedCase
+Parameter TalentLayerService.updateServiceData(uint256,uint256,string)._serviceId (contracts/TalentLayerService.sol#403) is not in mixedCase
+Parameter TalentLayerService.updateServiceData(uint256,uint256,string)._dataUri (contracts/TalentLayerService.sol#404) is not in mixedCase
+Parameter TalentLayerService.cancelService(uint256,uint256)._profileId (contracts/TalentLayerService.sol#421) is not in mixedCase
+Parameter TalentLayerService.cancelService(uint256,uint256)._serviceId (contracts/TalentLayerService.sol#421) is not in mixedCase
+Function ITalentLayerID._afterMint(string) (contracts/interfaces/ITalentLayerID.sol#35) is not in mixedCase
+Parameter ERC2771Recipient.addTrustedForwarder(address)._forwarder (contracts/libs/ERC2771Recipient.sol#34) is not in mixedCase
+Parameter ERC2771Recipient.removeTrustedForwarder(address)._forwarder (contracts/libs/ERC2771Recipient.sol#43) is not in mixedCase
+Parameter ERC2771RecipientUpgradeable.addTrustedForwarder(address)._forwarder (contracts/libs/ERC2771RecipientUpgradeable.sol#35) is not in mixedCase
+Parameter ERC2771RecipientUpgradeable.removeTrustedForwarder(address)._forwarder (contracts/libs/ERC2771RecipientUpgradeable.sol#44) is not in mixedCase
+Parameter TalentLayerIDV2.numberMinted(address)._user (contracts/tests/TalentLayerIDV2.sol#113) is not in mixedCase
+Parameter TalentLayerIDV2.getOriginatorPlatformIdByAddress(address)._address (contracts/tests/TalentLayerIDV2.sol#128) is not in mixedCase
+Parameter TalentLayerIDV2.isValid(uint256)._profileId (contracts/tests/TalentLayerIDV2.sol#136) is not in mixedCase
+Parameter TalentLayerIDV2.isDelegate(uint256,address)._profileId (contracts/tests/TalentLayerIDV2.sol#145) is not in mixedCase
+Parameter TalentLayerIDV2.isDelegate(uint256,address)._address (contracts/tests/TalentLayerIDV2.sol#145) is not in mixedCase
+Parameter TalentLayerIDV2.isOwnerOrDelegate(uint256,address)._profileId (contracts/tests/TalentLayerIDV2.sol#154) is not in mixedCase
+Parameter TalentLayerIDV2.isOwnerOrDelegate(uint256,address)._address (contracts/tests/TalentLayerIDV2.sol#154) is not in mixedCase
+Parameter TalentLayerIDV2.isWhitelisted(address,string,bytes32[])._address (contracts/tests/TalentLayerIDV2.sol#165) is not in mixedCase
+Parameter TalentLayerIDV2.isWhitelisted(address,string,bytes32[])._handle (contracts/tests/TalentLayerIDV2.sol#166) is not in mixedCase
+Parameter TalentLayerIDV2.isWhitelisted(address,string,bytes32[])._proof (contracts/tests/TalentLayerIDV2.sol#167) is not in mixedCase
+Parameter TalentLayerIDV2.mint(uint256,string)._platformId (contracts/tests/TalentLayerIDV2.sol#185) is not in mixedCase
+Parameter TalentLayerIDV2.mint(uint256,string)._handle (contracts/tests/TalentLayerIDV2.sol#186) is not in mixedCase
+Parameter TalentLayerIDV2.whitelistMint(uint256,string,bytes32[])._platformId (contracts/tests/TalentLayerIDV2.sol#201) is not in mixedCase
+Parameter TalentLayerIDV2.whitelistMint(uint256,string,bytes32[])._handle (contracts/tests/TalentLayerIDV2.sol#202) is not in mixedCase
+Parameter TalentLayerIDV2.whitelistMint(uint256,string,bytes32[])._proof (contracts/tests/TalentLayerIDV2.sol#203) is not in mixedCase
+Parameter TalentLayerIDV2.updateProfileData(uint256,string)._profileId (contracts/tests/TalentLayerIDV2.sol#219) is not in mixedCase
+Parameter TalentLayerIDV2.updateProfileData(uint256,string)._newCid (contracts/tests/TalentLayerIDV2.sol#219) is not in mixedCase
+Parameter TalentLayerIDV2.addDelegate(uint256,address)._profileId (contracts/tests/TalentLayerIDV2.sol#231) is not in mixedCase
+Parameter TalentLayerIDV2.addDelegate(uint256,address)._delegate (contracts/tests/TalentLayerIDV2.sol#231) is not in mixedCase
+Parameter TalentLayerIDV2.removeDelegate(uint256,address)._profileId (contracts/tests/TalentLayerIDV2.sol#242) is not in mixedCase
+Parameter TalentLayerIDV2.removeDelegate(uint256,address)._delegate (contracts/tests/TalentLayerIDV2.sol#242) is not in mixedCase
+Parameter TalentLayerIDV2.updateMintFee(uint256)._mintFee (contracts/tests/TalentLayerIDV2.sol#254) is not in mixedCase
+Parameter TalentLayerIDV2.freeMint(uint256,address,string)._platformId (contracts/tests/TalentLayerIDV2.sol#274) is not in mixedCase
+Parameter TalentLayerIDV2.freeMint(uint256,address,string)._userAddress (contracts/tests/TalentLayerIDV2.sol#275) is not in mixedCase
+Parameter TalentLayerIDV2.freeMint(uint256,address,string)._handle (contracts/tests/TalentLayerIDV2.sol#276) is not in mixedCase
+Parameter TalentLayerIDV2.updateMintStatus(TalentLayerIDV2.MintStatus)._mintStatus (contracts/tests/TalentLayerIDV2.sol#294) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+
+Variable TalentLayerEscrow._validatePayment(uint256,TalentLayerEscrow.PaymentType,uint256,uint256)._transaction (contracts/TalentLayerEscrow.sol#932) is too similar to TalentLayerEscrow.transactions (contracts/TalentLayerEscrow.sol#235)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#variable-names-too-similar
+
+SimpleERC20.constructor() (contracts/tests/SimpleERC20.sol#9-12) uses literals with too many digits:
+  - _mint(msg.sender,1000000000000000000000000) (contracts/tests/SimpleERC20.sol#10)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#too-many-digits
+
+Arbitrable (contracts/Arbitrable.sol#15-49) does not implement functions:
+  - Arbitrable.executeRuling(uint256,uint256) (contracts/Arbitrable.sol#48)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unimplemented-functions
+
+UUPSUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#107) is never used in TalentLayerEscrow (contracts/TalentLayerEscrow.sol#15-993)
+UUPSUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#107) is never used in TalentLayerID (contracts/TalentLayerID.sol#19-539)
+UUPSUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#107) is never used in TalentLayerPlatformID (contracts/TalentLayerPlatformID.sol#16-660)
+UUPSUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#107) is never used in TalentLayerReview (contracts/TalentLayerReview.sol#25-296)
+AccessControlUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol#259) is never used in TalentLayerService (contracts/TalentLayerService.sol#16-461)
+UUPSUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#107) is never used in TalentLayerIDV2 (contracts/tests/TalentLayerIDV2.sol#19-540)
+TalentLayerIDV2.testVariable (contracts/tests/TalentLayerIDV2.sol#80) is never used in TalentLayerIDV2 (contracts/tests/TalentLayerIDV2.sol#19-540)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-state-variable
+
+TalentLayerIDV2.talentLayerPlatformIdContract (contracts/tests/TalentLayerIDV2.sol#54) should be constant
+TalentLayerIDV2.testVariable (contracts/tests/TalentLayerIDV2.sol#80) should be constant
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-constant
+. analyzed (52 contracts with 81 detectors), 398 result(s) found
