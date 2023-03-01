@@ -1,4 +1,4 @@
-Scenarios exploration :
+Scenarios exploration:
 Compromised wallet. (User / platform manager)
 
 What if an arbitrator is updated while a dispute is in progress ?
@@ -13,13 +13,13 @@ What if I want to hide a review ?
 Impossible to burn an id ??
 Right to forgiveness ?
 
-Review process : very basic. Cannot ask for review before approval.
+Review process: very basic. Cannot ask for review before approval.
 Cannot choose to approve it or not.
 
 User experience
-If buyer’s wallet gets compromised : can release all funds, 
+If buyer’s wallet gets compromised: can release all funds, 
 If services provider’s wallet gets compromised.
 
 
 
- 
+ Il se passe quoi si un arbitrator est enlevé de la liste des officiels alors qu'il y a des litiges en cours ?

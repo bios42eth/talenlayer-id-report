@@ -1,7 +1,24 @@
 ## Findings
+
+### Coverage report cannot be run
+Severity
+High
+
+Location
+Build process
+
+Description
+When running the coverage, the compilation fails with this error: "CompilerError: Stack too deep."
+Without coverage, it becomes more difficult to identify parts of the code that are not covered by tests. This could lead to uncovered code.
+Even if coverage is not a garantee of code validity, it's a very useful tool during the development process to improve code security.
+
+Remediation
+Fix the compilation issue.
+
 ### Calls to sending ether are unchecked
 Severity
-medium
+Medium
+
 Location
 TalentLayerEscrow:613,620,746,754,784,787,797,798,969
 
@@ -10,14 +27,14 @@ Calls used for sending ether are unchecked. If the reciepient is a contract with
 The behavior of the contract won't be blocked, but the funds will remain locked in the contract. This issue is mitigated by the possibility of upgrading the contract.
 
 Remediation
-There are different options to fix this :
+There are different options to fix this:
 - Allow to collect the lost funds on the contract. This would likely give way more power to a centralized account.
 - Check transfer has been done correctly or revert. This could lead to blocking situations.
 - Fallbak to wrapped ether if call failed. This could lead to situation where the recipient contract does not know how to handle ERC20.
 
 ### Math rounding error
 Severity
-medium
+Medium
 Location 
 TalentLayerEscrow::\_executeRuling 791-792
 
@@ -42,7 +59,8 @@ Avoid calling it twice in that edge case.
 
 ### Delegate cannot call a function
 Severity 
-low
+Low
+
 Location
 TalentLayerEscrow::payArbitrationFeeBySender
 TalentLayerEscrow::payArbitrationFeeByReceiver
@@ -54,24 +72,68 @@ It seems logic they could do so.
 Remediation
 Authorize delegates to call those functions
 
+### Outdated comment
+Severity
+Low
+
+Location
+TalentLayerService::40
+
+Description
+The described param seems no longer used.
+
+Remediatino
+Remove the line
+
+### Invalid error message
+Severity
+Low
+
+Location
+TalentLayerService::336
+
+Description
+The error message seems not correct.
+
+Remediatino
+"This proposal is already updated" -> "This proposal is already validated"
+
 ### Create a modifier to improve readability
-TalentLayerPlatformID::
-updateProfileData, updateOriginServiceFeeRate, updateOriginValidatedProposalFeeRate
-updateArbitrator
-updateArbitrationFeeTimeout
-updateServicePostingFee
-updateProposalPostingFee
+Severity 
+Suggestion
+
+Location
+TalentLayerPlatformID::updateProfileData
+TalentLayerPlatformID::updateOriginServiceFeeRate
+TalentLayerPlatformID::updateOriginValidatedProposalFeeRate
+TalentLayerPlatformID::updateArbitrator
+TalentLayerPlatformID::updateArbitrationFeeTimeout
+TalentLayerPlatformID::updateServicePostingFee
+TalentLayerPlatformID::updateProposalPostingFee
  
 Description 
-The same requirement is copied multiple time.
+The same requirement is copied multiple times.
+require(ownerOf(\_platformId) == msg.sender, "You're not the owner of this platform");
 
 Suggestion
 Create a modifier to improve readability and maintenability.
 
+### msg.sender scope
+Severity
+Low
+
+Location
+TalentLayerArbitrator::loc:127.
+
+Description
+msg.sender is called in an internal function
+Suggestion
+Pass the recipient as param of the function or inline the function since it's used only once.
 
 ### Anyone can create a dispute
 Severity 
-notice
+Notice
+
 Location
 TalentLayerArbitrator::createDispute
 
