@@ -1,4 +1,5 @@
-Centralization
 Protections <> users scenarios
+Centralization - owner compromized
 gas optim
-assess tests
+assess tests - asserts ? coverage ?
+account abstraction impact ?

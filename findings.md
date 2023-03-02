@@ -32,6 +32,20 @@ There are different options to fix this:
 - Check transfer has been done correctly or revert. This could lead to blocking situations.
 - Fallbak to wrapped ether if call failed. This could lead to situation where the recipient contract does not know how to handle ERC20.
 
+### Unchecked transfered amount
+Severity
+Medium
+
+Location
+TalentLayerEscrow::createTransaction#478
+
+Description
+ERC20 transfered value is not checked. The call could work without the correct amount to be transfered. If less tokens are transfered, this would lead to an incoherent state and prevent the transaction from being finalized. This issue is mitigated by the fact that the allowed tokens are white listed. 
+In the current state, taxed tokens are not supported by the platform.
+
+Remediation
+Check the amount actually transfered to the escrow.
+
 ### Math rounding error
 Severity
 Medium
@@ -43,6 +57,7 @@ In case the amount is odd, 1 wei will remain in the contract.
 
 Remediation
 Send first half of the amount and then subsctract the amount sent for the second tranfer.
+
 
 ### Duplicate event can be fired
 Severity
@@ -189,6 +204,19 @@ https://github.com/crytic/slither/wiki/Detector-Documentation#boolean-equality
 Remediation 
 Remove boolean comparison 
 if (\_tokenAddress == address(0) && !\_status)
+
+### Transaction state machine
+Severity
+Suggestion
+
+Location
+TalentLayerEscrow
+
+Description
+Once the dispute is created, the only way to resolve the transaction is a ruling to happen. If the owner of the platform never responds, the transaction will get stuck and funds locked forever. This could happen because of key loss or end of project for example.
+
+Suggestion
+Add a timeout mechanism with a timer that can be updated by the plaform owner to ensure the owner is still alive.
 
 ### Create a modifier to improve readability
 Severity 

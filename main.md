@@ -1,6 +1,19 @@
 # Audit Talent Layer
 
-commit 9e720f3986bae4bb97c10b0dd9d2e1a3075fc81a
+## Scope
+url
+https://github.com/TalentLayer/talentlayer-id-contracts/
+
+commit 
+9e720f3986bae4bb97c10b0dd9d2e1a3075fc81a
+
+files
+contracts/TalentLayerArbitrator.sol
+contracts/TalentLayerEscrow.sol
+contracts/TalentLayerID.sol
+contracts/TalentLayerPlatformID.sol
+contracts/TalentLayerReview.sol
+contracts/TalentLayerService.sol
 
 ## Risks analysis
 See risks.md
@@ -12,16 +25,16 @@ No loop is used to process datas. This issue should not raise.
 ### Randomness 
 No randomness is used in the project.
 
-### Reentrancy: 
+### Reentrancy
 Some are subject to reentrancy but state is modified before external calls.
 See reentrancy.md
 
 ### Math 
 Solidity 0.8 is used, then no check are necessary for under/overflows.
-1 math issue found. See in findings.md
+1 math issue found. See findings.md
 
 ### Centralization: 
-Upgradable: high risk - give ownership to a DAO or multis wallet.
+Upgradable: high risk - give ownership to a DAO or multisig wallet.
 
 ### msg.sender scope
 Scope for msg.sender and \_msgSender() has been checked and seems correctly used : it's only called in constructors, modifiers or external functions.
@@ -37,7 +50,7 @@ See rightmanagement.md
 
 ## Protections
 Escrow
-Add a pause cirxuit breaker
+Add a pause circuit breaker
 Id: allow to change the wallet if compromised
 
 Release: add a speed bumper to save funds in case of id theft
