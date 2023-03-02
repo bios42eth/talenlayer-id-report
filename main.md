@@ -28,6 +28,10 @@ Scope for msg.sender and \_msgSender() has been checked and seems correctly used
 The only usage in an internal function is in TalentLayerArbitrator::loc:127.
 But the function is acutally called only once.
 
+### Time stamp
+block.timestamp is only used for real timed event comparison.
+It's very unlikely that the miners could take advantage of manipulating it.
+
 ### Right management
 See rightmanagement.md 
 

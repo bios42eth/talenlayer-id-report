@@ -28,6 +28,7 @@ Warning: Return value of low-level calls not used.
     |
 613 |                 payable(transaction.sender).call{value: senderFee}("");
     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Analysis: issue raised in findings.md
 
 
 Warning: Return value of low-level calls not used.
@@ -35,6 +36,7 @@ Warning: Return value of low-level calls not used.
     |
 620 |                 payable(transaction.receiver).call{value: receiverFee}("");
     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Analysis: issue raised in findings.md
 
 
 Warning: Return value of low-level calls not used.
@@ -42,6 +44,7 @@ Warning: Return value of low-level calls not used.
     |
 746 |             payable(transaction.sender).call{value: extraFeeSender}(""); // bios42 unchecked payment
     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Analysis: issue raised in findings.md
 
 
 Warning: Return value of low-level calls not used.
@@ -49,6 +52,7 @@ Warning: Return value of low-level calls not used.
     |
 754 |             payable(transaction.receiver).call{value: extraFeeReceiver}(""); // bios42 unchecked payment
     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Analysis: issue raised in findings.md
 
 
 Warning: Return value of low-level calls not used.
@@ -56,6 +60,7 @@ Warning: Return value of low-level calls not used.
     |
 784 |             sender.call{value: senderFee}(""); // bios42 - funds can get lost. Fallback to wrapped
     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Analysis: issue raised in findings.md
 
 
 Warning: Return value of low-level calls not used.
@@ -63,6 +68,7 @@ Warning: Return value of low-level calls not used.
     |
 787 |             receiver.call{value: receiverFee}("");
     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Analysis: issue raised in findings.md
 
 
 Warning: Return value of low-level calls not used.
@@ -70,6 +76,7 @@ Warning: Return value of low-level calls not used.
     |
 797 |             sender.call{value: splitFeeAmount}("");
     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Analysis: issue raised in findings.md
 
 
 Warning: Return value of low-level calls not used.
@@ -77,6 +84,7 @@ Warning: Return value of low-level calls not used.
     |
 798 |             receiver.call{value: splitFeeAmount}(""); // bios42 - some wei can get lost in case of rounding
     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Analysis: issue raised in findings.md
 
 
 Warning: Return value of low-level calls not used.
@@ -84,42 +92,54 @@ Warning: Return value of low-level calls not used.
     |
 969 |             _recipient.call{value: _amount}(""); // bios42 - what if transfer fails ?
     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
+Analysis: issue raised in findings.md
 
 
 TalentLayerEscrow.createTransaction(uint256,uint256,string,string) (contracts/TalentLayerEscrow.sol#409-486) uses arbitrary from in transferFrom: require(bool,string)(IERC20(proposal.rateToken).transferFrom(sender,address(this),transactionAmount),Transfer must not fail) (contracts/TalentLayerEscrow.sol#477-480)
 Reference: https://github.com/trailofbits/slither/wiki/Detector-Documentation#arbitrary-send-erc20
+Analysis: false positive - sender is checked in line 439.
 
 TalentLayerArbitrator._giveRuling(uint256,uint256) (contracts/TalentLayerArbitrator.sol#119-129) sends eth to arbitrary user
   Dangerous calls:
   - address(msg.sender).transfer(dispute.fee) (contracts/TalentLayerArbitrator.sol#127)
+Analysis: issue raised in findings.md
+
 TalentLayerEscrow._safeTransferBalance(address,address,uint256) (contracts/TalentLayerEscrow.sol#967-973) sends eth to arbitrary user
   Dangerous calls:
   - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
+Analysis: false positive
+
 TalentLayerPlatformID.withdraw() (contracts/TalentLayerPlatformID.sol#383-386) sends eth to arbitrary user
   Dangerous calls:
   - (sent) = address(msg.sender).call{value: address(this).balance}() (contracts/TalentLayerPlatformID.sol#384)
+Analysis: false positive - access is checked
+
 MockForwarder.execute(MockForwarder.ForwardRequest) (contracts/mocks/MockForwarder.sol#25-36) sends eth to arbitrary user
   Dangerous calls:
   - (success,ret) = req.to.call{gas: req.gas,value: req.value}(callData) (contracts/mocks/MockForwarder.sol#27)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+Analysis: out of scope
 
 ERC1967UpgradeUpgradeable._functionDelegateCall(address,bytes) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#198-204) uses delegatecall to a input-controlled function id
   - (success,returndata) = target.delegatecall(data) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#202)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#controlled-delegatecall
+Analysis: out of scope
 
 Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
   External calls:
   - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
   State variables written after the call(s):
   - transaction.senderFee = _arbitrationCost (contracts/TalentLayerEscrow.sol#745)
+Analysis: false positive - contracts are owned by the protocol.
+
 Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
   External calls:
   - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
   - address(transaction.sender).call{value: extraFeeSender}() (contracts/TalentLayerEscrow.sol#746)
   State variables written after the call(s):
   - transaction.receiverFee = _arbitrationCost (contracts/TalentLayerEscrow.sol#753)
+Analysis: false positive - contracts are owned by the protocol or reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624):
   External calls:
   - address(transaction.sender).call{value: senderFee}() (contracts/TalentLayerEscrow.sol#613)
@@ -145,6 +165,8 @@ Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/Talent
     - transaction.senderFee = 0 (contracts/TalentLayerEscrow.sol#778)
     - transaction.receiverFee = 0 (contracts/TalentLayerEscrow.sol#779)
     - transaction.status = Status.Resolved (contracts/TalentLayerEscrow.sol#780)
+Analysis: false positive - contracts are owned by the protocol or reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624):
   External calls:
   - address(transaction.receiver).call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#620)
@@ -171,12 +193,15 @@ Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/Talent
     - transaction.receiverFee = 0 (contracts/TalentLayerEscrow.sol#779)
     - transaction.status = Status.Resolved (contracts/TalentLayerEscrow.sol#780)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities
+Analysis: false positive - contracts are owned by the protocol or reentrancy is not dangerous.
 
 TalentLayerEscrow._safeTransferBalance(address,address,uint256) (contracts/TalentLayerEscrow.sol#967-973) ignores return value by IERC20(_tokenAddress).transfer(_recipient,_amount) (contracts/TalentLayerEscrow.sol#971)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-transfer
+Analysis: raised in findings.md
 
 TalentLayerIDV2.talentLayerPlatformIdContract (contracts/tests/TalentLayerIDV2.sol#54) is never initialized. It is used in:
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-state-variables
+Analysis: out of scope
 
 Base64Upgradeable.encode(bytes) (node_modules/@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol#20-91) performs a multiplication on the result of a division:
   - result = new string(4 * ((data.length + 2) / 3)) (node_modules/@openzeppelin/contracts-upgradeable/utils/Base64Upgradeable.sol#36)
@@ -229,10 +254,12 @@ Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils
   - prod0 = prod0 / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#105)
   - result = prod0 * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#132)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#divide-before-multiply
+Analysis: out of scope
 
 TalentLayerEscrow.getTransactionDetails(uint256) (contracts/TalentLayerEscrow.sol#367-377) uses a dangerous strict equality:
   - require(bool,string)(sender == transaction.sender || sender == transaction.receiver,You are not related to this transaction) (contracts/TalentLayerEscrow.sol#372-375)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+Analysis: false positive
 
 Reentrancy in TalentLayerID.freeMint(uint256,address,string) (contracts/TalentLayerID.sol#285-292):
   External calls:
@@ -241,6 +268,8 @@ Reentrancy in TalentLayerID.freeMint(uint256,address,string) (contracts/TalentLa
   State variables written after the call(s):
   - _afterMint(_userAddress,_handle,_platformId,0) (contracts/TalentLayerID.sol#291)
     - takenHandles[_handle] = true (contracts/TalentLayerID.sol#330)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerIDV2.freeMint(uint256,address,string) (contracts/tests/TalentLayerIDV2.sol#273-280):
   External calls:
   - _safeMint(_userAddress,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#278)
@@ -248,6 +277,8 @@ Reentrancy in TalentLayerIDV2.freeMint(uint256,address,string) (contracts/tests/
   State variables written after the call(s):
   - _afterMint(_userAddress,_handle,_platformId,0) (contracts/tests/TalentLayerIDV2.sol#279)
     - takenHandles[_handle] = true (contracts/tests/TalentLayerIDV2.sol#318)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerID.mint(uint256,string) (contracts/TalentLayerID.sol#196-204):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#202)
@@ -255,6 +286,8 @@ Reentrancy in TalentLayerID.mint(uint256,string) (contracts/TalentLayerID.sol#19
   State variables written after the call(s):
   - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#203)
     - takenHandles[_handle] = true (contracts/TalentLayerID.sol#330)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerPlatformID.mint(string) (contracts/TalentLayerPlatformID.sol#233-238):
   External calls:
   - _safeMint(msg.sender,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#236)
@@ -262,6 +295,8 @@ Reentrancy in TalentLayerPlatformID.mint(string) (contracts/TalentLayerPlatformI
   State variables written after the call(s):
   - _afterMint(_platformName,msg.sender) (contracts/TalentLayerPlatformID.sol#237)
     - takenNames[_platformName] = true (contracts/TalentLayerPlatformID.sol#433)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerIDV2.mint(uint256,string) (contracts/tests/TalentLayerIDV2.sol#184-192):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#190)
@@ -269,6 +304,8 @@ Reentrancy in TalentLayerIDV2.mint(uint256,string) (contracts/tests/TalentLayerI
   State variables written after the call(s):
   - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#191)
     - takenHandles[_handle] = true (contracts/tests/TalentLayerIDV2.sol#318)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerPlatformID.mintForAddress(string,address) (contracts/TalentLayerPlatformID.sol#246-252):
   External calls:
   - _safeMint(_platformAddress,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#250)
@@ -276,6 +313,8 @@ Reentrancy in TalentLayerPlatformID.mintForAddress(string,address) (contracts/Ta
   State variables written after the call(s):
   - _afterMint(_platformName,_platformAddress) (contracts/TalentLayerPlatformID.sol#251)
     - takenNames[_platformName] = true (contracts/TalentLayerPlatformID.sol#433)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerID.whitelistMint(uint256,string,bytes32[]) (contracts/TalentLayerID.sol#212-223):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#221)
@@ -283,6 +322,8 @@ Reentrancy in TalentLayerID.whitelistMint(uint256,string,bytes32[]) (contracts/T
   State variables written after the call(s):
   - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#222)
     - takenHandles[_handle] = true (contracts/TalentLayerID.sol#330)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerIDV2.whitelistMint(uint256,string,bytes32[]) (contracts/tests/TalentLayerIDV2.sol#200-211):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#209)
@@ -291,10 +332,12 @@ Reentrancy in TalentLayerIDV2.whitelistMint(uint256,string,bytes32[]) (contracts
   - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#210)
     - takenHandles[_handle] = true (contracts/tests/TalentLayerIDV2.sol#318)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-1
+Analysis: out of scope
 
 TalentLayerReview.mint(uint256,uint256,string,uint256) (contracts/TalentLayerReview.sol#119-148) contains a tautology or contradiction:
   - require(bool,string)(_rating <= 5 && _rating >= 0,Invalid rating) (contracts/TalentLayerReview.sol#132)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#tautology-or-contradiction
+Analysis: added to findings
 
 TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624) ignores return value by address(transaction.sender).call{value: senderFee}() (contracts/TalentLayerEscrow.sol#613)
 TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624) ignores return value by address(transaction.receiver).call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#620)
@@ -306,31 +349,38 @@ TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.s
 TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802) ignores return value by receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
 TalentLayerEscrow._safeTransferBalance(address,address,uint256) (contracts/TalentLayerEscrow.sol#967-973) ignores return value by _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-low-level-calls
+Analysis: added to findings
 
 ERC1967UpgradeUpgradeable._upgradeToAndCallUUPS(address,bytes,bool).slot (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#98) is a local variable never initialized
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+Analysis: out of scope
 
 ERC1967UpgradeUpgradeable._upgradeToAndCallUUPS(address,bytes,bool) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#87-105) ignores return value by IERC1822ProxiableUpgradeable(newImplementation).proxiableUUID() (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#98-102)
 ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#434-456) ignores return value by IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(),from,tokenId,data) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441-452)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+Analysis: out of scope
 
 TalentLayerEscrow.initialize(address,address,address,address)._protocolWallet (contracts/TalentLayerEscrow.sol#330) lacks a zero-check on :
     - protocolWallet = address(_protocolWallet) (contracts/TalentLayerEscrow.sol#338)
 TalentLayerEscrow.updateProtocolWallet(address)._protocolWallet (contracts/TalentLayerEscrow.sol#396) lacks a zero-check on :
     - protocolWallet = _protocolWallet (contracts/TalentLayerEscrow.sol#397)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+Analysis : added to findings
 
 Variable 'ERC1967UpgradeUpgradeable._upgradeToAndCallUUPS(address,bytes,bool).slot (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#98)' in ERC1967UpgradeUpgradeable._upgradeToAndCallUUPS(address,bytes,bool) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#87-105) potentially used before declaration: require(bool,string)(slot == _IMPLEMENTATION_SLOT,ERC1967Upgrade: unsupported proxiableUUID) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#99)
 Variable 'ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes).retval (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#441)' in ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#434-456) potentially used before declaration: retval == IERC721ReceiverUpgradeable.onERC721Received.selector (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#442)
 Variable 'ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes).reason (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#443)' in ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#434-456) potentially used before declaration: reason.length == 0 (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#444)
 Variable 'ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes).reason (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#443)' in ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#434-456) potentially used before declaration: revert(uint256,uint256)(32 + reason,mload(uint256)(reason)) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#449)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#pre-declaration-usage-of-local-variables
+Analysis: out of scope
 
 Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
   External calls:
   - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
   State variables written after the call(s):
   - disputeIDtoTransactionID[transaction.disputeId] = _transactionId (contracts/TalentLayerEscrow.sol#739)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerID.freeMint(uint256,address,string) (contracts/TalentLayerID.sol#285-292):
   External calls:
   - _safeMint(_userAddress,nextProfileId.current()) (contracts/TalentLayerID.sol#290)
@@ -341,6 +391,8 @@ Reentrancy in TalentLayerID.freeMint(uint256,address,string) (contracts/TalentLa
   - _afterMint(_userAddress,_handle,_platformId,0) (contracts/TalentLayerID.sol#291)
     - profile.platformId = _platformId (contracts/TalentLayerID.sol#328)
     - profile.handle = _handle (contracts/TalentLayerID.sol#329)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerIDV2.freeMint(uint256,address,string) (contracts/tests/TalentLayerIDV2.sol#273-280):
   External calls:
   - _safeMint(_userAddress,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#278)
@@ -351,6 +403,8 @@ Reentrancy in TalentLayerIDV2.freeMint(uint256,address,string) (contracts/tests/
   - _afterMint(_userAddress,_handle,_platformId,0) (contracts/tests/TalentLayerIDV2.sol#279)
     - profile.platformId = _platformId (contracts/tests/TalentLayerIDV2.sol#316)
     - profile.handle = _handle (contracts/tests/TalentLayerIDV2.sol#317)
+Analysis: out of scope
+
 Reentrancy in TalentLayerID.mint(uint256,string) (contracts/TalentLayerID.sol#196-204):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#202)
@@ -361,6 +415,8 @@ Reentrancy in TalentLayerID.mint(uint256,string) (contracts/TalentLayerID.sol#19
   - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#203)
     - profile.platformId = _platformId (contracts/TalentLayerID.sol#328)
     - profile.handle = _handle (contracts/TalentLayerID.sol#329)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerPlatformID.mint(string) (contracts/TalentLayerPlatformID.sol#233-238):
   External calls:
   - _safeMint(msg.sender,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#236)
@@ -372,6 +428,8 @@ Reentrancy in TalentLayerPlatformID.mint(string) (contracts/TalentLayerPlatformI
     - platform.name = _platformName (contracts/TalentLayerPlatformID.sol#430)
     - platform.id = platformId (contracts/TalentLayerPlatformID.sol#431)
     - platform.arbitrationFeeTimeout = minArbitrationFeeTimeout (contracts/TalentLayerPlatformID.sol#432)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerReview.mint(uint256,uint256,string,uint256) (contracts/TalentLayerReview.sol#119-148):
   External calls:
   - _safeMint(sender,nextReviewId.current()) (contracts/TalentLayerReview.sol#146)
@@ -379,6 +437,8 @@ Reentrancy in TalentLayerReview.mint(uint256,uint256,string,uint256) (contracts/
   State variables written after the call(s):
   - _afterMint(_serviceId,toId,_rating,_reviewUri) (contracts/TalentLayerReview.sol#147)
     - reviews[reviewId] = Review(reviewId,_to,_reviewUri,_serviceId,_rating) (contracts/TalentLayerReview.sol#168-174)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerIDV2.mint(uint256,string) (contracts/tests/TalentLayerIDV2.sol#184-192):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#190)
@@ -389,6 +449,8 @@ Reentrancy in TalentLayerIDV2.mint(uint256,string) (contracts/tests/TalentLayerI
   - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#191)
     - profile.platformId = _platformId (contracts/tests/TalentLayerIDV2.sol#316)
     - profile.handle = _handle (contracts/tests/TalentLayerIDV2.sol#317)
+Analysis: out of scope
+
 Reentrancy in TalentLayerPlatformID.mintForAddress(string,address) (contracts/TalentLayerPlatformID.sol#246-252):
   External calls:
   - _safeMint(_platformAddress,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#250)
@@ -400,6 +462,8 @@ Reentrancy in TalentLayerPlatformID.mintForAddress(string,address) (contracts/Ta
     - platform.name = _platformName (contracts/TalentLayerPlatformID.sol#430)
     - platform.id = platformId (contracts/TalentLayerPlatformID.sol#431)
     - platform.arbitrationFeeTimeout = minArbitrationFeeTimeout (contracts/TalentLayerPlatformID.sol#432)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerID.whitelistMint(uint256,string,bytes32[]) (contracts/TalentLayerID.sol#212-223):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#221)
@@ -410,6 +474,8 @@ Reentrancy in TalentLayerID.whitelistMint(uint256,string,bytes32[]) (contracts/T
   - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#222)
     - profile.platformId = _platformId (contracts/TalentLayerID.sol#328)
     - profile.handle = _handle (contracts/TalentLayerID.sol#329)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerIDV2.whitelistMint(uint256,string,bytes32[]) (contracts/tests/TalentLayerIDV2.sol#200-211):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#209)
@@ -421,12 +487,15 @@ Reentrancy in TalentLayerIDV2.whitelistMint(uint256,string,bytes32[]) (contracts
     - profile.platformId = _platformId (contracts/tests/TalentLayerIDV2.sol#316)
     - profile.handle = _handle (contracts/tests/TalentLayerIDV2.sol#317)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+Analysis: out of scope
 
 Reentrancy in TalentLayerEscrow._afterPayment(uint256,TalentLayerEscrow.PaymentType,uint256) (contracts/TalentLayerEscrow.sol#951-959):
   External calls:
   - talentLayerServiceContract.afterFullPayment(transaction.serviceId) (contracts/TalentLayerEscrow.sol#956)
   Event emitted after the call(s):
   - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802):
   External calls:
   - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
@@ -443,6 +512,8 @@ Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/Talen
     - _reimburse(_transactionId,amount) (contracts/TalentLayerEscrow.sol#785)
   - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
     - _reimburse(_transactionId,amount) (contracts/TalentLayerEscrow.sol#785)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802):
   External calls:
   - receiver.call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#787)
@@ -463,6 +534,8 @@ Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/Talen
     - _release(_transactionId,amount) (contracts/TalentLayerEscrow.sol#788)
   - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
     - _release(_transactionId,amount) (contracts/TalentLayerEscrow.sol#788)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802):
   External calls:
   - _reimburse(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#794)
@@ -487,6 +560,8 @@ Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/Talen
     - _release(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#795)
   - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
     - _release(_transactionId,splitTransactionAmount) (contracts/TalentLayerEscrow.sol#795)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/TalentLayerEscrow.sol#767-802):
   External calls:
   - sender.call{value: senderFee}() (contracts/TalentLayerEscrow.sol#784)
@@ -524,6 +599,8 @@ Reentrancy in TalentLayerEscrow._executeRuling(uint256,uint256) (contracts/Talen
   - receiver.call{value: splitFeeAmount}() (contracts/TalentLayerEscrow.sol#798)
   Event emitted after the call(s):
   - RulingExecuted(_transactionId,_ruling) (contracts/TalentLayerEscrow.sol#801)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
   External calls:
   - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
@@ -535,6 +612,8 @@ Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/Talent
   - address(transaction.sender).call{value: extraFeeSender}() (contracts/TalentLayerEscrow.sol#746)
   Event emitted after the call(s):
   - ArbitrationFeePayment(_transactionId,ArbitrationFeePaymentType.Reimburse,Party.Sender,msg.value) (contracts/TalentLayerEscrow.sol#747)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/TalentLayerEscrow.sol#730-757):
   External calls:
   - transaction.disputeId = arbitrator.createDispute{value: _arbitrationCost}(AMOUNT_OF_CHOICES,transaction.arbitratorExtraData) (contracts/TalentLayerEscrow.sol#735-738)
@@ -542,6 +621,8 @@ Reentrancy in TalentLayerEscrow._raiseDispute(uint256,uint256) (contracts/Talent
   - address(transaction.receiver).call{value: extraFeeReceiver}() (contracts/TalentLayerEscrow.sol#754)
   Event emitted after the call(s):
   - ArbitrationFeePayment(_transactionId,ArbitrationFeePaymentType.Reimburse,Party.Receiver,msg.value) (contracts/TalentLayerEscrow.sol#755)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow._reimburse(uint256,uint256) (contracts/TalentLayerEscrow.sol#867-877):
   External calls:
   - _safeTransferBalance(address(transaction.sender),transaction.token,totalReleaseAmount) (contracts/TalentLayerEscrow.sol#874)
@@ -557,6 +638,8 @@ Reentrancy in TalentLayerEscrow._reimburse(uint256,uint256) (contracts/TalentLay
     - _afterPayment(_transactionId,PaymentType.Reimburse,_amount) (contracts/TalentLayerEscrow.sol#876)
   - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
     - _afterPayment(_transactionId,PaymentType.Reimburse,_amount) (contracts/TalentLayerEscrow.sol#876)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow._release(uint256,uint256) (contracts/TalentLayerEscrow.sol#852-859):
   External calls:
   - _safeTransferBalance(address(transaction.receiver),transaction.token,_amount) (contracts/TalentLayerEscrow.sol#856)
@@ -572,6 +655,8 @@ Reentrancy in TalentLayerEscrow._release(uint256,uint256) (contracts/TalentLayer
     - _afterPayment(_transactionId,PaymentType.Release,_amount) (contracts/TalentLayerEscrow.sol#858)
   - PaymentCompleted(transaction.serviceId) (contracts/TalentLayerEscrow.sol#957)
     - _afterPayment(_transactionId,PaymentType.Release,_amount) (contracts/TalentLayerEscrow.sol#858)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624):
   External calls:
   - address(transaction.sender).call{value: senderFee}() (contracts/TalentLayerEscrow.sol#613)
@@ -602,6 +687,8 @@ Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/Talent
     - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
   - RulingExecuted(_transactionId,_ruling) (contracts/TalentLayerEscrow.sol#801)
     - _executeRuling(_transactionId,RECEIVER_WINS) (contracts/TalentLayerEscrow.sol#615)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624):
   External calls:
   - address(transaction.receiver).call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#620)
@@ -632,6 +719,8 @@ Reentrancy in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/Talent
     - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
   - RulingExecuted(_transactionId,_ruling) (contracts/TalentLayerEscrow.sol#801)
     - _executeRuling(_transactionId,SENDER_WINS) (contracts/TalentLayerEscrow.sol#622)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow.claim(uint256,address) (contracts/TalentLayerEscrow.sol#675-692):
   External calls:
   - _safeTransferBalance(recipient,_tokenAddress,amount) (contracts/TalentLayerEscrow.sol#689)
@@ -642,6 +731,8 @@ Reentrancy in TalentLayerEscrow.claim(uint256,address) (contracts/TalentLayerEsc
     - _recipient.call{value: _amount}() (contracts/TalentLayerEscrow.sol#969)
   Event emitted after the call(s):
   - FeesClaimed(_platformId,_tokenAddress,amount) (contracts/TalentLayerEscrow.sol#691)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerEscrow.createTransaction(uint256,uint256,string,string) (contracts/TalentLayerEscrow.sol#409-486):
   External calls:
   - talentLayerServiceContract.afterDeposit(_serviceId,_proposalId,transactionId) (contracts/TalentLayerEscrow.sol#474)
@@ -651,6 +742,8 @@ Reentrancy in TalentLayerEscrow.createTransaction(uint256,uint256,string,string)
     - _afterCreateTransaction(service.ownerId,proposal.ownerId,transactionId,_metaEvidence) (contracts/TalentLayerEscrow.sol#483)
   - TransactionCreated(_transactionId,_senderId,_receiverId,transaction.token,transaction.amount,transaction.serviceId,transaction.proposalId,protocolEscrowFeeRate,transaction.originServiceFeeRate,transaction.originValidatedProposalFeeRate,transaction.arbitrator,transaction.arbitratorExtraData,transaction.arbitrationFeeTimeout) (contracts/TalentLayerEscrow.sol#828-842)
     - _afterCreateTransaction(service.ownerId,proposal.ownerId,transactionId,_metaEvidence) (contracts/TalentLayerEscrow.sol#483)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerID.freeMint(uint256,address,string) (contracts/TalentLayerID.sol#285-292):
   External calls:
   - _safeMint(_userAddress,nextProfileId.current()) (contracts/TalentLayerID.sol#290)
@@ -658,6 +751,8 @@ Reentrancy in TalentLayerID.freeMint(uint256,address,string) (contracts/TalentLa
   Event emitted after the call(s):
   - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/TalentLayerID.sol#333)
     - _afterMint(_userAddress,_handle,_platformId,0) (contracts/TalentLayerID.sol#291)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerIDV2.freeMint(uint256,address,string) (contracts/tests/TalentLayerIDV2.sol#273-280):
   External calls:
   - _safeMint(_userAddress,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#278)
@@ -665,6 +760,8 @@ Reentrancy in TalentLayerIDV2.freeMint(uint256,address,string) (contracts/tests/
   Event emitted after the call(s):
   - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/tests/TalentLayerIDV2.sol#321)
     - _afterMint(_userAddress,_handle,_platformId,0) (contracts/tests/TalentLayerIDV2.sol#279)
+Analysis: out of scope
+
 Reentrancy in TalentLayerID.mint(uint256,string) (contracts/TalentLayerID.sol#196-204):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#202)
@@ -672,6 +769,8 @@ Reentrancy in TalentLayerID.mint(uint256,string) (contracts/TalentLayerID.sol#19
   Event emitted after the call(s):
   - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/TalentLayerID.sol#333)
     - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#203)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerPlatformID.mint(string) (contracts/TalentLayerPlatformID.sol#233-238):
   External calls:
   - _safeMint(msg.sender,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#236)
@@ -679,6 +778,8 @@ Reentrancy in TalentLayerPlatformID.mint(string) (contracts/TalentLayerPlatformI
   Event emitted after the call(s):
   - Mint(_platformAddress,platformId,_platformName,mintFee,minArbitrationFeeTimeout) (contracts/TalentLayerPlatformID.sol#436)
     - _afterMint(_platformName,msg.sender) (contracts/TalentLayerPlatformID.sol#237)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerReview.mint(uint256,uint256,string,uint256) (contracts/TalentLayerReview.sol#119-148):
   External calls:
   - _safeMint(sender,nextReviewId.current()) (contracts/TalentLayerReview.sol#146)
@@ -686,6 +787,8 @@ Reentrancy in TalentLayerReview.mint(uint256,uint256,string,uint256) (contracts/
   Event emitted after the call(s):
   - Mint(_serviceId,_to,reviewId,_rating,_reviewUri) (contracts/TalentLayerReview.sol#176)
     - _afterMint(_serviceId,toId,_rating,_reviewUri) (contracts/TalentLayerReview.sol#147)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerIDV2.mint(uint256,string) (contracts/tests/TalentLayerIDV2.sol#184-192):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#190)
@@ -693,6 +796,8 @@ Reentrancy in TalentLayerIDV2.mint(uint256,string) (contracts/tests/TalentLayerI
   Event emitted after the call(s):
   - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/tests/TalentLayerIDV2.sol#321)
     - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#191)
+Analysis: out of scope
+
 Reentrancy in TalentLayerPlatformID.mintForAddress(string,address) (contracts/TalentLayerPlatformID.sol#246-252):
   External calls:
   - _safeMint(_platformAddress,nextPlatformId.current()) (contracts/TalentLayerPlatformID.sol#250)
@@ -700,6 +805,8 @@ Reentrancy in TalentLayerPlatformID.mintForAddress(string,address) (contracts/Ta
   Event emitted after the call(s):
   - Mint(_platformAddress,platformId,_platformName,mintFee,minArbitrationFeeTimeout) (contracts/TalentLayerPlatformID.sol#436)
     - _afterMint(_platformName,_platformAddress) (contracts/TalentLayerPlatformID.sol#251)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerID.whitelistMint(uint256,string,bytes32[]) (contracts/TalentLayerID.sol#212-223):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/TalentLayerID.sol#221)
@@ -707,6 +814,8 @@ Reentrancy in TalentLayerID.whitelistMint(uint256,string,bytes32[]) (contracts/T
   Event emitted after the call(s):
   - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/TalentLayerID.sol#333)
     - _afterMint(sender,_handle,_platformId,msg.value) (contracts/TalentLayerID.sol#222)
+Analysis: false positive - reentrancy is not dangerous.
+
 Reentrancy in TalentLayerIDV2.whitelistMint(uint256,string,bytes32[]) (contracts/tests/TalentLayerIDV2.sol#200-211):
   External calls:
   - _safeMint(sender,nextProfileId.current()) (contracts/tests/TalentLayerIDV2.sol#209)
@@ -714,6 +823,8 @@ Reentrancy in TalentLayerIDV2.whitelistMint(uint256,string,bytes32[]) (contracts
   Event emitted after the call(s):
   - Mint(_userAddress,userProfileId,_handle,_platformId,_fee) (contracts/tests/TalentLayerIDV2.sol#321)
     - _afterMint(sender,_handle,_platformId,msg.value) (contracts/tests/TalentLayerIDV2.sol#210)
+Analysis : out of scope
+
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
 
 TalentLayerEscrow.getTransactionDetails(uint256) (contracts/TalentLayerEscrow.sol#367-377) uses timestamp for comparisons
@@ -744,6 +855,7 @@ TalentLayerEscrow._validatePayment(uint256,TalentLayerEscrow.PaymentType,uint256
   Dangerous comparisons:
   - require(bool,string)(transactions.length > _transaction.id,Invalid transaction id) (contracts/TalentLayerEscrow.sol#939)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+Analysis : false positives
 
 ERC721Upgradeable._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#434-456) uses assembly
   - INLINE ASM (node_modules/@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol#448-450)
@@ -777,8 +889,12 @@ Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils
   - INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#66-70)
   - INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#86-93)
   - INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#100-109)
+Analysis : out of scope
+
 TalentLayerArbitrator.bytesToUint(bytes) (contracts/TalentLayerArbitrator.sol#164-171) uses assembly
   - INLINE ASM (contracts/TalentLayerArbitrator.sol#167-169)
+Analysis : false positives
+
 ERC2771Recipient._msgSender() (contracts/libs/ERC2771Recipient.sol#54-65) uses assembly
   - INLINE ASM (contracts/libs/ERC2771Recipient.sol#59-61)
 ERC2771RecipientUpgradeable._msgSender() (contracts/libs/ERC2771RecipientUpgradeable.sol#55-66) uses assembly
@@ -786,9 +902,12 @@ ERC2771RecipientUpgradeable._msgSender() (contracts/libs/ERC2771RecipientUpgrade
 MockForwarder.execute(MockForwarder.ForwardRequest) (contracts/mocks/MockForwarder.sol#25-36) uses assembly
   - INLINE ASM (contracts/mocks/MockForwarder.sol#30-32)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+Analysis : out of scope
 
 TalentLayerService.updateAllowedTokenList(address,bool,uint256) (contracts/TalentLayerService.sol#372-384) compares to a boolean constant:
   -_tokenAddress == address(0) && _status == false (contracts/TalentLayerService.sol#377)
+Analysis : added to findings
+
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#boolean-equality
 
 Different versions of Solidity are used:
@@ -845,18 +964,29 @@ Different versions of Solidity are used:
   - ^0.8.9 (contracts/mocks/MockForwarder.sol#2)
   - ^0.8.9 (contracts/tests/SimpleERC20.sol#2)
   - ^0.8.9 (contracts/tests/TalentLayerIDV2.sol#2)
+Analysis: not really an issue
+
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
 
 ERC2771Recipient._msgData() (contracts/libs/ERC2771Recipient.sol#68-74) is never used and should be removed
 ERC2771RecipientUpgradeable._msgData() (contracts/libs/ERC2771RecipientUpgradeable.sol#69-81) is never used and should be removed
+Analysis: out of scope
+
 TalentLayerID._burn(uint256) (contracts/TalentLayerID.sol#391) is never used and should be removed
+Analysis: added to findings
+
 TalentLayerID._msgData() (contracts/TalentLayerID.sol#449-457) is never used and should be removed
 TalentLayerIDV2._burn(uint256) (contracts/tests/TalentLayerIDV2.sol#392) is never used and should be removed
 TalentLayerIDV2._msgData() (contracts/tests/TalentLayerIDV2.sol#450-458) is never used and should be removed
+Analysis: out of scope
+
 TalentLayerReview._burn(uint256) (contracts/TalentLayerReview.sol#216) is never used and should be removed
+Analysis: added to findings
+
 TalentLayerReview._msgData() (contracts/TalentLayerReview.sol#258-266) is never used and should be removed
 TalentLayerService._msgData() (contracts/TalentLayerService.sol#443-451) is never used and should be removed
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dead-code
+Analysis: false positives
 
 Pragma version>=0.6.0 (node_modules/@opengsn/contracts/src/interfaces/IERC2771Recipient.sol#2) allows old versions
 Pragma version^0.8.0 (node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol#4) allows old versions
@@ -911,6 +1041,8 @@ Pragma version^0.8.9 (contracts/mocks/MockForwarder.sol#2) allows old versions
 Pragma version^0.8.9 (contracts/tests/SimpleERC20.sol#2) allows old versions
 Pragma version^0.8.9 (contracts/tests/TalentLayerIDV2.sol#2) allows old versions
 solc-0.8.17 is not recommended for deployment
+Analysis: not really an issue
+
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
 
 Low level call in ERC1967UpgradeUpgradeable._functionDelegateCall(address,bytes) (node_modules/@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol#198-204):
@@ -921,6 +1053,8 @@ Low level call in AddressUpgradeable.functionCallWithValue(address,bytes,uint256
   - (success,returndata) = target.call{value: value}(data) (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#135)
 Low level call in AddressUpgradeable.functionStaticCall(address,bytes,string) (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#155-162):
   - (success,returndata) = target.staticcall(data) (node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol#160)
+Analysis: out of scope
+
 Low level call in TalentLayerEscrow.arbitrationFeeTimeout(uint256) (contracts/TalentLayerEscrow.sol#601-624):
   - address(transaction.sender).call{value: senderFee}() (contracts/TalentLayerEscrow.sol#613)
   - address(transaction.receiver).call{value: receiverFee}() (contracts/TalentLayerEscrow.sol#620)
@@ -938,14 +1072,18 @@ Low level call in TalentLayerID.withdraw() (contracts/TalentLayerID.sol#274-277)
   - (sent) = address(_msgSender()).call{value: address(this).balance}() (contracts/TalentLayerID.sol#275)
 Low level call in TalentLayerPlatformID.withdraw() (contracts/TalentLayerPlatformID.sol#383-386):
   - (sent) = address(msg.sender).call{value: address(this).balance}() (contracts/TalentLayerPlatformID.sol#384)
+Analysis: false positives
+
 Low level call in MockForwarder.execute(MockForwarder.ForwardRequest) (contracts/mocks/MockForwarder.sol#25-36):
   - (success,ret) = req.to.call{gas: req.gas,value: req.value}(callData) (contracts/mocks/MockForwarder.sol#27)
 Low level call in TalentLayerIDV2.withdraw() (contracts/tests/TalentLayerIDV2.sol#262-265):
   - (sent) = address(_msgSender()).call{value: address(this).balance}() (contracts/tests/TalentLayerIDV2.sol#263)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+Analysis: out of scope
 
 TalentLayerReview (contracts/TalentLayerReview.sol#25-296) should inherit from ITalentLayerReview (contracts/interfaces/ITalentLayerReview.sol#8-25)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance
+Analysis: added to findings
 
 Function AccessControlUpgradeable.__AccessControl_init() (node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol#51-52) is not in mixedCase
 Function AccessControlUpgradeable.__AccessControl_init_unchained() (node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol#54-55) is not in mixedCase
@@ -1144,17 +1282,21 @@ Parameter TalentLayerIDV2.freeMint(uint256,address,string)._userAddress (contrac
 Parameter TalentLayerIDV2.freeMint(uint256,address,string)._handle (contracts/tests/TalentLayerIDV2.sol#276) is not in mixedCase
 Parameter TalentLayerIDV2.updateMintStatus(TalentLayerIDV2.MintStatus)._mintStatus (contracts/tests/TalentLayerIDV2.sol#294) is not in mixedCase
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+Analysis: not really important to me
 
 Variable TalentLayerEscrow._validatePayment(uint256,TalentLayerEscrow.PaymentType,uint256,uint256)._transaction (contracts/TalentLayerEscrow.sol#932) is too similar to TalentLayerEscrow.transactions (contracts/TalentLayerEscrow.sol#235)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#variable-names-too-similar
+Analysis: false positive
 
 SimpleERC20.constructor() (contracts/tests/SimpleERC20.sol#9-12) uses literals with too many digits:
   - _mint(msg.sender,1000000000000000000000000) (contracts/tests/SimpleERC20.sol#10)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#too-many-digits
+Analysis: out of scope
 
 Arbitrable (contracts/Arbitrable.sol#15-49) does not implement functions:
   - Arbitrable.executeRuling(uint256,uint256) (contracts/Arbitrable.sol#48)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unimplemented-functions
+Analysis: out of scope
 
 UUPSUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#107) is never used in TalentLayerEscrow (contracts/TalentLayerEscrow.sol#15-993)
 UUPSUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#107) is never used in TalentLayerID (contracts/TalentLayerID.sol#19-539)
@@ -1164,8 +1306,11 @@ AccessControlUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable
 UUPSUpgradeable.__gap (node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol#107) is never used in TalentLayerIDV2 (contracts/tests/TalentLayerIDV2.sol#19-540)
 TalentLayerIDV2.testVariable (contracts/tests/TalentLayerIDV2.sol#80) is never used in TalentLayerIDV2 (contracts/tests/TalentLayerIDV2.sol#19-540)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-state-variable
+Analysis: out of scope
 
 TalentLayerIDV2.talentLayerPlatformIdContract (contracts/tests/TalentLayerIDV2.sol#54) should be constant
 TalentLayerIDV2.testVariable (contracts/tests/TalentLayerIDV2.sol#80) should be constant
+Analysis: out of scope
+
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-constant
 . analyzed (52 contracts with 81 detectors), 398 result(s) found

@@ -20,7 +20,7 @@ Severity
 Medium
 
 Location
-TalentLayerEscrow:613,620,746,754,784,787,797,798,969
+TalentLayerEscrow#613,620,746,754,784,787,797,798,969
 
 Description
 Calls used for sending ether are unchecked. If the reciepient is a contract with no payable fallback, the call will silently fail.
@@ -36,7 +36,7 @@ There are different options to fix this:
 Severity
 Medium
 Location 
-TalentLayerEscrow::\_executeRuling 791-792
+TalentLayerEscrow::\_executeRuling#791-792
 
 Description
 In case the amount is odd, 1 wei will remain in the contract.
@@ -49,7 +49,7 @@ Severity
 Depends on the event's usage
 
 Location
-TalentLayerEscrow::\_executeRuling 794-795
+TalentLayerEscrow::\_executeRuling#794-795
 
 Description
 Since the amount is set to 0 before calling \_reimburse and \_release, emit PaymentCompleted(transaction.serviceId); will be called twice.
@@ -77,7 +77,7 @@ Severity
 Low
 
 Location
-TalentLayerService::40
+TalentLayerService#40
 
 Description
 The described param seems no longer used.
@@ -90,13 +90,105 @@ Severity
 Low
 
 Location
-TalentLayerService::336
+TalentLayerService#336
 
 Description
 The error message seems not correct.
 
 Remediatino
 "This proposal is already updated" -> "This proposal is already validated"
+
+### msg.sender scope
+Severity
+Low
+
+Location
+TalentLayerArbitrator#127.
+
+Description
+msg.sender is called in an internal function
+Suggestion
+Pass the recipient as param of the function or inline the function since it's used only once.
+
+### Tautology
+Severity
+Low
+
+Location
+TalentLayerReview.mint#132
+
+Description
+\_rating >= 0 is always true
+https://github.com/crytic/slither/wiki/Detector-Documentation#tautology-or-contradiction
+
+Suggestion
+Remove the check from the require statement
+
+### Dead code
+Severity
+Low
+
+Location
+TalentLayerReview::\_burn#216
+TalentLayerID.sol::\_burn#391
+
+Description
+Code is never used and should be removed
+
+Remediation
+Remove useless code
+
+### Missing inheritance
+Severity
+Low
+
+Location
+TalentLayerEscrow#15
+TalentLayerID#19
+TalentLayerPlatformID#16
+TalentLayerReview#25
+TalentLayerService#16
+
+Description
+Class does not inherit from interface. This can lead to discrepencies between the interface and implementation.
+
+Remediation
+Inherit from interface.
+
+
+### Missing zero address validation
+Severity 
+Low
+
+Location 
+TalentLayerArbitrator#52
+TalentLayerEscrow#326
+TalentLayerEscrow::updateProtocolWallet#396
+TalentLayerID#108
+TalentLayerReview#81
+TalentLayerService#187
+
+Decription 
+addresses passed as params are not checked for nullity.
+https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+
+Remediation
+Require a valid address in the initializer
+
+### Boolean comparison
+Severity
+Notice
+
+Location
+TalentLayerService.updateAllowedTokenList#377
+
+Description
+if (\_tokenAddress == address(0) && \_status == false)
+https://github.com/crytic/slither/wiki/Detector-Documentation#boolean-equality
+
+Remediation 
+Remove boolean comparison 
+if (\_tokenAddress == address(0) && !\_status)
 
 ### Create a modifier to improve readability
 Severity 
@@ -117,18 +209,6 @@ require(ownerOf(\_platformId) == msg.sender, "You're not the owner of this platf
 
 Suggestion
 Create a modifier to improve readability and maintenability.
-
-### msg.sender scope
-Severity
-Low
-
-Location
-TalentLayerArbitrator::loc:127.
-
-Description
-msg.sender is called in an internal function
-Suggestion
-Pass the recipient as param of the function or inline the function since it's used only once.
 
 ### Anyone can create a dispute
 Severity 

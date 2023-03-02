@@ -23,3 +23,5 @@ If services provider’s wallet gets compromised.
 
 
  Il se passe quoi si un arbitrator est enlevé de la liste des officiels alors qu'il y a des litiges en cours ?
+
+ 2 comptes complices pourraient-ils vider l'escrow ?
