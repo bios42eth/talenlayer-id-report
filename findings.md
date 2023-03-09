@@ -1,20 +1,5 @@
 ## Findings
 
-### Coverage report cannot be run
-Severity
-High
-
-Location
-Build process
-
-Description
-When running the coverage, the compilation fails with this error: "CompilerError: Stack too deep."
-Without coverage, it becomes more difficult to identify parts of the code that are not covered by tests. This could lead to uncovered code.
-Even if coverage is not a garantee of code validity, it's a very useful tool during the development process to improve code security.
-
-Remediation
-Fix the compilation issue.
-
 ### Calls to sending ether are unchecked
 Severity
 Medium
@@ -58,6 +43,20 @@ In case the amount is odd, 1 wei will remain in the contract.
 Remediation
 Send first half of the amount and then subsctract the amount sent for the second tranfer.
 
+### Coverage report cannot be run
+Severity
+Medium
+
+Location
+Build process
+
+Description
+When running the coverage, the compilation fails with this error: "CompilerError: Stack too deep."
+Without coverage, it becomes more difficult to identify parts of the code that are not covered by tests. This could lead to uncovered code.
+Even if coverage is not a garantee of code validity, it's a very useful tool during the development process to improve code security.
+
+Remediation
+Fix the compilation issue.
 
 ### Duplicate event can be fired
 Severity
