@@ -43,6 +43,20 @@ In case the amount is odd, 1 wei will remain in the contract.
 Remediation
 Send first half of the amount and then subsctract the amount sent for the second tranfer.
 
+### Use of transfer deprecated
+Severity
+Medium
+
+Location
+TalentLayerArbitrator::127
+
+Description
+payable(msg.sender).transfer(dispute.fee); 
+
+Remediation
+Avoid using transfer: gas limit may become an issue
+
+
 ### Coverage report cannot be run
 Severity
 Medium
@@ -251,3 +265,46 @@ But there is no reason for doing so.
 
 Suggestion  
 Check platformId validity
+
+### Appeal management
+Severity 
+Notice
+
+Location
+TalentLayerEscrow.sol#45
+
+Description
+According to the Arbitrator interface, an appeal can be requested. The current implementation of TalentLayerArbitrator will prevent it, but another implementation could allow it. TalentLayerEscrow could not handle that state.
+
+Remediation
+Do not whitelist Arbitrators that allow appeal until it's managed by TalentLayerEscrow.
+
+## Gas optimization
+
+### Multiple external contract calls
+Severity
+Medium
+
+Location
+TalentLayerEscrow::getClaimableFeeBalance#356,357
+TalentLayerEscrow::createTransaction#415-416, 417-418
+TalentLayerEscrow::\_distributeFees#887-890
+
+Description
+2 external call are made to the same contract.
+
+Remediation
+Pack all required information in 1 call will gain gas.
+
+### Useless owner
+Severity
+Low
+
+Location
+TalentLayerArbitrator::11
+
+Description
+Owner does not seem to be used.
+
+Remediation
+Remove the owner and onlyOwner modifier.

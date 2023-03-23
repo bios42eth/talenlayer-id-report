@@ -33,9 +33,6 @@ See reentrancy.md
 Solidity 0.8 is used, then no check are necessary for under/overflows.
 1 math issue found. See findings.md
 
-### Centralization: 
-Upgradable: high risk - give ownership to a DAO or multisig wallet.
-
 ### msg.sender scope
 Scope for msg.sender and \_msgSender() has been checked and seems correctly used : it's only called in constructors, modifiers or external functions.
 The only usage in an internal function is in TalentLayerArbitrator::loc:127.
@@ -48,31 +45,28 @@ It's very unlikely that the miners could take advantage of manipulating it.
 ### Right management
 See rightmanagement.md 
 
+## Centralization
+Owner has a very limited role and can only access maintenance functions, except regarding to the upgrade of the contracts.
+Thus, owner can potentially do whatever it wants.
+It's recommended to use a mechanism involving at least 2 people to validate an owner transaction.
+
 ## Protections
 Escrow
-Add a pause circuit breaker
-Id: allow to change the wallet if compromised
+The Escrow contract holds all the funds and can be a target. In case of issue, the only way to fix a problem is to update the contract. It might take some time to do it in a reliable way. 
+To gain time, I'd recommend adding a pause circuit breaker that could block all transfers for investigation in case of trouble.
 
-Release: add a speed bumper to save funds in case of id theft
-
-Circuit breakers
-Speed bumps
-Rate limiter
-Automatic deprecation
+I would consider adding a delay between a release and the actual funds transfer to allow identifing issues before releasing funds for real. 
 
 ## Code base analysis
 ### Tests 
-Working fine
-Todo: assess them
+Tests have been run and work fine. They seem well written with expectations.
+It's difficult to evaluate the scope covered by the tests because of missing coverage.
 
-### Coverage: cannot be run.
-"CompilerError: Stack too deep."
+### Coverage
+Test coverage cannot be run. I get this error: "CompilerError: Stack too deep."
 
 ### Slither 
 Runtime report > slither-report.txt
-
-## Gas optimization
-
 
 
 
