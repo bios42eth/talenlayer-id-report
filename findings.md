@@ -233,6 +233,8 @@ https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-addre
 Remediation
 Require a valid address in the initializer
 
+Dev Answer: After analysing every cases, we conclude that there is no bloquant case where it must be mandatory, so we just keep the code simpler without extra check.
+
 ### Boolean comparison
 Severity
 Notice
@@ -285,6 +287,8 @@ require(ownerOf(\_platformId) == msg.sender, "You're not the owner of this platf
 Suggestion
 Create a modifier to improve readability and maintenability.
 
+Dev Answer: Fixed
+
 ### Anyone can create a dispute
 Severity 
 Notice
@@ -316,6 +320,8 @@ According to the Arbitrator interface, an appeal can be requested. The current i
 Remediation
 Do not whitelist Arbitrators that allow appeal until it's managed by TalentLayerEscrow.
 
+Dev Answer: Noted
+
 ## Gas optimization
 
 ### Multiple external contract calls
@@ -333,6 +339,8 @@ Description
 Remediation
 Pack all required information in 1 call will gain gas.
 
+Dev Answer: Fixed
+
 ### Useless owner
 Severity
 Low
@@ -345,3 +353,5 @@ Owner does not seem to be used.
 
 Remediation
 Remove the owner and onlyOwner modifier.
+
+Dev Answer: Fixed
