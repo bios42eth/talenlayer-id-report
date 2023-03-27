@@ -17,6 +17,9 @@ There are different options to fix this:
 - Check transfer has been done correctly or revert. This could lead to blocking situations.
 - Fallbak to wrapped ether if call failed. This could lead to situation where the recipient contract does not know how to handle ERC20.
 
+Dev Answer: 
+Like you explain in your remediation, every alternative come with others downside that we found more risky than the current implementation. 
+
 ### Unchecked transfered amount
 Severity
 Medium
@@ -31,6 +34,9 @@ In the current state, taxed tokens are not supported by the platform.
 Remediation
 Check the amount actually transfered to the escrow.
 
+Dev Answer: 
+The propocol management an allowed list of tokens, we will always make sure to prevent specific token like rebase one to prevent any issue like that.
+
 ### Math rounding error
 Severity
 Medium
@@ -42,6 +48,9 @@ In case the amount is odd, 1 wei will remain in the contract.
 
 Remediation
 Send first half of the amount and then subsctract the amount sent for the second tranfer.
+
+Dev Answer: 
+We decided to keep the code simple and to not handle this edge case as it's rarissime to have a odd number in wei. The contract have no issue with extra wei inside. Also that add +0.016 on contract size and bit more on execution.
 
 ### Use of transfer deprecated
 Severity
@@ -55,6 +64,8 @@ payable(msg.sender).transfer(dispute.fee);
 
 Remediation
 Avoid using transfer: gas limit may become an issue
+
+Dev Answer: Fixed
 
 
 ### Coverage report cannot be run
@@ -72,6 +83,8 @@ Even if coverage is not a garantee of code validity, it's a very useful tool dur
 Remediation
 Fix the compilation issue.
 
+Dev Answer: Fixed
+
 ### Duplicate event can be fired
 Severity
 Depends on the event's usage
@@ -84,6 +97,8 @@ Since the amount is set to 0 before calling \_reimburse and \_release, emit Paym
 
 Remediation
 Avoid calling it twice in that edge case.
+
+Dev Answer: We check and confirm that the double could not lead to an issue on our indexer. We will keep it that way for now.
 
 ### Delegate cannot call a function
 Severity 
@@ -100,6 +115,8 @@ It seems logic they could do so.
 Remediation
 Authorize delegates to call those functions
 
+Dev Answer: We activate delegate only on not payable function.
+
 ### Outdated comment
 Severity
 Low
@@ -113,6 +130,8 @@ The described param seems no longer used.
 Remediatino
 Remove the line
 
+Dev Answer: Fixed
+
 ### Invalid error message
 Severity
 Low
@@ -123,8 +142,10 @@ TalentLayerService#336
 Description
 The error message seems not correct.
 
-Remediatino
+Remediation
 "This proposal is already updated" -> "This proposal is already validated"
+
+Dev Answer: Fixed
 
 ### msg.sender scope
 Severity
@@ -135,8 +156,11 @@ TalentLayerArbitrator#127.
 
 Description
 msg.sender is called in an internal function
+
 Suggestion
 Pass the recipient as param of the function or inline the function since it's used only once.
+
+Dev Answer: Fixed
 
 ### Tautology
 Severity
@@ -152,6 +176,8 @@ https://github.com/crytic/slither/wiki/Detector-Documentation#tautology-or-contr
 Suggestion
 Remove the check from the require statement
 
+Dev Answer: Fixed
+
 ### Dead code
 Severity
 Low
@@ -165,6 +191,8 @@ Code is never used and should be removed
 
 Remediation
 Remove useless code
+
+Dev Answer: It's a security fix to avoid to call it by mistake
 
 ### Missing inheritance
 Severity
@@ -182,6 +210,8 @@ Class does not inherit from interface. This can lead to discrepencies between th
 
 Remediation
 Inherit from interface.
+
+Dev Answer: Fixed
 
 
 ### Missing zero address validation
@@ -203,6 +233,8 @@ https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-addre
 Remediation
 Require a valid address in the initializer
 
+Dev Answer: After analysing every cases, we conclude that there is no bloquant case where it must be mandatory, so we just keep the code simpler without extra check.
+
 ### Boolean comparison
 Severity
 Notice
@@ -218,6 +250,8 @@ Remediation
 Remove boolean comparison 
 if (\_tokenAddress == address(0) && !\_status)
 
+Dev Answer: Fixed
+
 ### Transaction state machine
 Severity
 Suggestion
@@ -230,6 +264,8 @@ Once the dispute is created, the only way to resolve the transaction is a ruling
 
 Suggestion
 Add a timeout mechanism with a timer that can be updated by the plaform owner to ensure the owner is still alive.
+
+Dev Answer: Globally, we plan to add multiple decentralized and independant arbitrators like Kleros in the future. Still we will take this point into account in the next version of our own TalentLayer.
 
 ### Create a modifier to improve readability
 Severity 
@@ -251,6 +287,8 @@ require(ownerOf(\_platformId) == msg.sender, "You're not the owner of this platf
 Suggestion
 Create a modifier to improve readability and maintenability.
 
+Dev Answer: Fixed
+
 ### Anyone can create a dispute
 Severity 
 Notice
@@ -266,6 +304,9 @@ But there is no reason for doing so.
 Suggestion  
 Check platformId validity
 
+Dev Answer: As a user need to pay to call this function, it will remove any incentive to do it, even more because there is no impact to do so.
+
+
 ### Appeal management
 Severity 
 Notice
@@ -278,6 +319,8 @@ According to the Arbitrator interface, an appeal can be requested. The current i
 
 Remediation
 Do not whitelist Arbitrators that allow appeal until it's managed by TalentLayerEscrow.
+
+Dev Answer: Noted
 
 ## Gas optimization
 
@@ -296,6 +339,8 @@ Description
 Remediation
 Pack all required information in 1 call will gain gas.
 
+Dev Answer: Fixed
+
 ### Useless owner
 Severity
 Low
@@ -308,3 +353,5 @@ Owner does not seem to be used.
 
 Remediation
 Remove the owner and onlyOwner modifier.
+
+Dev Answer: Fixed
